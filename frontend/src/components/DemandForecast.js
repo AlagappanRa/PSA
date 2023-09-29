@@ -6,17 +6,21 @@ import Box from '@mui/material/Box';
 
 const DemandForecast = () => {
   const [forecast, setForecast] = useState(null);
-  const [modelSummary, setModelSummary] = useState('');
 
   const getForecast = async () => {
     try {
       const sampleData = {
-        demand: [100, 110, 120, 130, 140, 150, 160, 170, 180, 190]
+        'berth_capacity': [100, 200, 300, 400, 500],
+        'ship_size': [50, 60, 70, 80, 90],
+        'cargo_volume': [1000, 2000, 3000, 4000, 5000],
+        'equipment_availability': [10, 20, 30, 40, 50],
+        'worker_availability': [5, 10, 15, 20, 25],
+        'operational_costs': [1000, 2000, 3000, 4000, 5000],
+        'demand': [100, 110, 120, 130, 140]
       };
 
       const response = await axios.post('http://localhost:5000/forecast', sampleData);
-      setForecast(response.data.future_demand[0]);
-      setModelSummary(response.data.model_summary);
+      setForecast(response.data.future_demand);
     } catch (error) {
       console.error('There was an error fetching the forecast!', error);
     }
@@ -31,9 +35,6 @@ const DemandForecast = () => {
         <Box style={{ marginTop: '20px' }}>
           <Typography variant="h6">
             Forecasted Demand: {forecast}
-          </Typography>
-          <Typography variant="body1" style={{ marginTop: '10px', whiteSpace: 'pre-line' }}>
-            {modelSummary}
           </Typography>
         </Box>
       )}

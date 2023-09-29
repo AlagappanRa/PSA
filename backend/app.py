@@ -4,9 +4,28 @@ import pandas as pd
 from sklearn.linear_model import LinearRegression
 from pulp import LpMaximize, LpProblem, LpVariable, lpSum
 from pmdarima import auto_arima
+import joblib
+from pymongo import MongoClient
+import gridfs
+import os
 
 app = Flask(__name__)
 CORS(app)
+
+uri = "mongodb+srv://hoegpt:yJzfbBiMhZywyLRE@cluster0.fenmosq.mongodb.net/?retryWrites=true&w=majority&tlsAllowInvalidCertificates=true"
+
+# Create a new client and connect to the server
+client = MongoClient(uri)
+
+db = client['modelDB']  # You can change 'modelDB' to your preferred database name
+fs = gridfs.GridFS(db)
+
+# Send a ping to confirm a successful connection
+try:
+    client.admin.command('ping')
+    print("Pinged your deployment. You successfully connected to MongoDB!")
+except Exception as e:
+    print(e)
 
 @app.route('/upload', methods=['POST'])
 def upload_data():
@@ -17,12 +36,28 @@ def upload_data():
     if file.filename == '':
         return jsonify({'error': 'No selected file'})
 
-    # For simplicity, let's assume it's a CSV file and load it into a pandas DataFrame
     df = pd.read_csv(file)
     
-    # Here, you can add data preprocessing, cleaning, and validation as needed
-    
     return jsonify({'message': 'File uploaded and processed successfully', 'data': df.to_dict()})
+
+@app.route('/train', methods=['POST'])
+def train_model():
+    data = request.json
+    df = pd.DataFrame(data)
+    X = df.drop(columns=['demand'])
+    y = df['demand']
+
+    model = LinearRegression()
+    model.fit(X, y)
+
+    joblib.dump(model, 'model.pkl')
+
+    with open('model.pkl', 'rb') as f:
+        fs.put(f, filename="model.pkl")
+
+    os.remove('model.pkl')
+
+    return jsonify({'message': 'Model trained and stored in MongoDB successfully'})
 
 @app.route('/forecast', methods=['POST'])
 def forecast_demand():
@@ -30,19 +65,16 @@ def forecast_demand():
     if not data:
         return jsonify({'error': 'No data provided'})
 
+    # Convert the received JSON data to a DataFrame
     df = pd.DataFrame(data)
-    demand_data = df['demand']
 
-    model = auto_arima(demand_data, seasonal=False, trace=True, suppress_warnings=True)
-    model.fit(demand_data)
-    future_demand, conf_int = model.predict(n_periods=1, return_conf_int=True)
+    # Assume we are using a Random Forest model for this example
+    model = RandomForestRegressor()
+    model.fit(df.drop(columns=['demand']), df['demand'])
 
-    return jsonify({
-        'future_demand': future_demand.tolist(),
-        'confidence_interval': conf_int.tolist(),
-        'model_summary': str(model.summary())
-    })
+    future_demand = model.predict(df.drop(columns=['demand']))
 
+    return jsonify({'future_demand': future_demand.tolist()})
 
 @app.route('/optimize', methods=['POST'])
 def optimize_resources():
@@ -50,40 +82,20 @@ def optimize_resources():
     if not data:
         return jsonify({'error': 'No data provided'})
 
-    # We'll use linear programming for resource allocation optimization as an example
     model = LpProblem(name="resource-allocation", sense=LpMaximize)
 
-    # Create decision variables
     x = {i: LpVariable(name=f"x{i}", lowBound=0) for i in range(len(data['resources']))}
 
-    # Objective function
     model += lpSum(data['profits'][i] * x[i] for i in range(len(data['resources']))), "Profit"
 
-    # Constraints
     for i in range(len(data['resources'])):
         model += (x[i] <= data['resources'][i])
 
-    # Solve the optimization problem
     model.solve()
 
-    # Get the optimized resource allocation
     allocation = [x[i].value() for i in range(len(data['resources']))]
 
     return jsonify({'optimized_allocation': allocation})
-
-@app.route('/realtime', methods=['GET'])
-def get_realtime_data():
-    # In a real scenario, this endpoint would connect to a real-time data source or database
-    # For this example, we'll return a sample real-time data
-    
-    realtime_data = {
-        'ships_in_port': 5,
-        'available_berths': 2,
-        'ongoing_operations': 3,
-        'available_equipment': 10
-    }
-
-    return jsonify({'realtime_data': realtime_data})
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
