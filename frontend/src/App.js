@@ -1,19 +1,28 @@
-// src/App.js
-
-import React from 'react';
-import './App.css';
-import DataUpload from './components/DataUpload.js';
-import DemandForecast from './components/DemandForecast.js';
+import React from "react";
+import { Routes, Route, Link } from "react-router-dom";
+import LandingPage from "./components/LandingPage";
+import DataUpload from "./components/DataUpload";
+import DemandForecast from "./components/DemandForecast";
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
+import CargoShipAnimation from "./components/ShipAnimation";
+import "./App.css";
+import { motion } from "framer-motion";
+import { navVariants } from "./utils/motion";
 
 function App() {
-  return (
-    <div className="App">
-      <h1>Port Optimization System</h1>
-      <DataUpload />
-      <DemandForecast />
-      {/* You can add more components as needed */}
-    </div>
-  );
+    return (
+        <>
+            <header>
+                <Navbar className="w-full mb-0" />
+            </header>
+            <main className="w-full  mt-0">
+                <CargoShipAnimation />
+            </main>
+
+            <Footer />
+        </>
+    );
 }
 
 export default App;
