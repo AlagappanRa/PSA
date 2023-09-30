@@ -2,7 +2,7 @@
  * Common transition configuration used in animations.
  * @type {object}
  */
-export const transition = { type: 'spring', duration: 0.8 };
+export const transition = { type: "spring", duration: 0.8 };
 
 /**
  * Animation variant for text elements with a specified delay.
@@ -11,19 +11,19 @@ export const transition = { type: 'spring', duration: 0.8 };
  * @returns {object} - The animation variant object for text elements.
  */
 export const textVariant = (delay) => ({
-  hidden: {
-    y: 50,
-    opacity: 0,
-  },
-  show: {
-    y: 0,
-    opacity: 1,
-    transition: {
-      type: 'spring',
-      duration: 1.25,
-      delay,
+    hidden: {
+        y: 50,
+        opacity: 0,
     },
-  },
+    show: {
+        y: 0,
+        opacity: 1,
+        transition: {
+            type: "spring",
+            duration: 1.25,
+            delay,
+        },
+    },
 });
 
 /**
@@ -31,18 +31,18 @@ export const textVariant = (delay) => ({
  * @type {object}
  */
 export const textVariant2 = {
-  hidden: {
-    opacity: 0,
-    y: 20,
-  },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: 'tween',
-      ease: 'easeIn',
+    hidden: {
+        opacity: 0,
+        y: 20,
     },
-  },
+    show: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            type: "tween",
+            ease: "easeIn",
+        },
+    },
 };
 
 /**
@@ -50,13 +50,13 @@ export const textVariant2 = {
  * @type {object}
  */
 export const textContainer = {
-  hidden: {
-    opacity: 0,
-  },
-  show: (i = 1) => ({
-    opacity: 1,
-    transition: { staggerChildren: 0.1, delayChildren: i * 0.1 },
-  }),
+    hidden: {
+        opacity: 0,
+    },
+    show: (i = 1) => ({
+        opacity: 1,
+        transition: { staggerChildren: 0.1, delayChildren: i * 0.1 },
+    }),
 };
 
 /**
@@ -68,13 +68,13 @@ export const textContainer = {
  * @returns {object} - The animation variant object for the staggered container.
  */
 export const staggerContainer = (staggerChildren, delayChildren) => ({
-  hidden: {},
-  show: {
-    transition: {
-      staggerChildren,
-      delayChildren,
+    hidden: {},
+    show: {
+        transition: {
+            staggerChildren,
+            delayChildren,
+        },
     },
-  },
 });
 
 /**
@@ -82,24 +82,24 @@ export const staggerContainer = (staggerChildren, delayChildren) => ({
  * @type {object}
  */
 export const navVariants = {
-  hidden: {
-    opacity: 0,
-    y: -50,
-    transition: {
-      type: 'spring',
-      stiffness: 300,
-      damping: 140,
+    hidden: {
+        opacity: 0,
+        y: -50,
+        transition: {
+            type: "spring",
+            stiffness: 300,
+            damping: 140,
+        },
     },
-  },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: 'spring',
-      stiffness: 80,
-      delay: 1,
+    show: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            type: "spring",
+            stiffness: 80,
+            delay: 1,
+        },
     },
-  },
 };
 
 /**
@@ -110,49 +110,49 @@ export const navVariants = {
  * @returns {object} - The slide animation object with initial, animate, and exit properties.
  */
 export const slideAnimation = (direction) => {
-  // Calculate the x and y values for initial and exit animations
-  let x = 0;
-  let y = 0;
-  let exitX = 0;
-  let exitY = 0;
+    // Calculate the x and y values for initial and exit animations
+    let x = 0;
+    let y = 0;
+    let exitX = 0;
+    let exitY = 0;
 
-  // Update x and y values based on the direction
-  if (direction === 'left') {
-    x = -100;
-    exitX = -100;
-  } else if (direction === 'right') {
-    x = 100;
-    exitX = 100;
-  }
+    // Update x and y values based on the direction
+    if (direction === "left") {
+        x = -100;
+        exitX = -100;
+    } else if (direction === "right") {
+        x = 100;
+        exitX = 100;
+    }
 
-  if (direction === 'up') {
-    y = 100;
-    exitY = 100;
-  } else if (direction === 'down') {
-    y = -100;
-    exitY = -100;
-  }
+    if (direction === "up") {
+        y = 100;
+        exitY = 100;
+    } else if (direction === "down") {
+        y = -100;
+        exitY = -100;
+    }
 
-  // Return an object with initial, animate, and exit properties for slide animation
-  return {
-    initial: {
-      x,
-      y,
-      opacity: 0,
-      transition: { ...transition, delay: 0.5 },
-    },
-    animate: {
-      x: 0,
-      y: 0,
-      opacity: 1,
-      transition: { ...transition, delay: 0 },
-    },
-    exit: {
-      x: exitX,
-      y: exitY,
-      transition: { ...transition, delay: 0 },
-    },
-  };
+    // Return an object with initial, animate, and exit properties for slide animation
+    return {
+        initial: {
+            x,
+            y,
+            opacity: 0,
+            transition: { ...transition, delay: 0.5 },
+        },
+        animate: {
+            x: 0,
+            y: 0,
+            opacity: 1,
+            transition: { ...transition, delay: 0 },
+        },
+        exit: {
+            x: exitX,
+            y: exitY,
+            transition: { ...transition, delay: 0 },
+        },
+    };
 };
 
 /**
@@ -166,37 +166,37 @@ export const slideAnimation = (direction) => {
  * @returns {object} - The slide-in animation variant object.
  */
 export const slideIn = (direction, type, delay, duration) => {
-  // Calculate the x and y values based on the direction
-  let x = 0;
-  let y = 0;
+    // Calculate the x and y values based on the direction
+    let x = 0;
+    let y = 0;
 
-  if (direction === 'left') {
-    x = '-100%';
-  } else if (direction === 'right') {
-    x = '100%';
-  }
+    if (direction === "left") {
+        x = "-100%";
+    } else if (direction === "right") {
+        x = "100%";
+    }
 
-  if (direction === 'up' || direction === 'down') {
-    y = '100%';
-  }
+    if (direction === "up" || direction === "down") {
+        y = "100%";
+    }
 
-  // Return an object with hidden and show properties for slide-in animation
-  return {
-    hidden: {
-      x,
-      y,
-    },
-    show: {
-      x: 0,
-      y: 0,
-      transition: {
-        type,
-        delay,
-        duration,
-        ease: 'easeOut',
-      },
-    },
-  };
+    // Return an object with hidden and show properties for slide-in animation
+    return {
+        hidden: {
+            x,
+            y,
+        },
+        show: {
+            x: 0,
+            y: 0,
+            transition: {
+                type,
+                delay,
+                duration,
+                ease: "easeOut",
+            },
+        },
+    };
 };
 
 /**
@@ -204,18 +204,18 @@ export const slideIn = (direction, type, delay, duration) => {
  * @type {object}
  */
 export const fadeAnimation = {
-  initial: {
-    opacity: 0,
-    transition: { ...transition, delay: 0.5 },
-  },
-  animate: {
-    opacity: 1,
-    transition: { ...transition, delay: 0 },
-  },
-  exit: {
-    opacity: 0,
-    transition: { ...transition, delay: 0 },
-  },
+    initial: {
+        opacity: 0,
+        transition: { ...transition, delay: 0.5 },
+    },
+    animate: {
+        opacity: 1,
+        transition: { ...transition, delay: 0 },
+    },
+    exit: {
+        opacity: 0,
+        transition: { ...transition, delay: 0 },
+    },
 };
 
 /**
@@ -229,41 +229,41 @@ export const fadeAnimation = {
  * @returns {object} - The fade-in animation variant object.
  */
 export const fadeIn = (direction, type, delay, duration) => {
-  // Calculate the x and y values based on the direction
-  let x = 0;
-  let y = 0;
+    // Calculate the x and y values based on the direction
+    let x = 0;
+    let y = 0;
 
-  if (direction === 'left') {
-    x = 100;
-  } else if (direction === 'right') {
-    x = -100;
-  }
+    if (direction === "left") {
+        x = 100;
+    } else if (direction === "right") {
+        x = -100;
+    }
 
-  if (direction === 'up') {
-    y = 100;
-  } else if (direction === 'down') {
-    y = -100;
-  }
+    if (direction === "up") {
+        y = 100;
+    } else if (direction === "down") {
+        y = -100;
+    }
 
-  // Return an object with hidden and show properties for fade-in animation
-  return {
-    hidden: {
-      x,
-      y,
-      opacity: 0,
-    },
-    show: {
-      x: 0,
-      y: 0,
-      opacity: 1,
-      transition: {
-        type,
-        delay,
-        duration,
-        ease: 'easeOut',
-      },
-    },
-  };
+    // Return an object with hidden and show properties for fade-in animation
+    return {
+        hidden: {
+            x,
+            y,
+            opacity: 0,
+        },
+        show: {
+            x: 0,
+            y: 0,
+            opacity: 1,
+            transition: {
+                type,
+                delay,
+                duration,
+                ease: "easeOut",
+            },
+        },
+    };
 };
 
 /**
@@ -273,19 +273,19 @@ export const fadeIn = (direction, type, delay, duration) => {
  * @returns {object} - The diorama animation variant object.
  */
 export const dioramaAnimation = (direction) => ({
-  hidden: {
-    x: direction === 'left' ? '-100%' : '100%',
-    rotate: 120,
-  },
-  show: {
-    x: 0,
-    rotate: 0,
-    transition: {
-      type: 'spring',
-      duration: 1.8,
-      delay: 0.5,
+    hidden: {
+        x: direction === "left" ? "-100%" : "100%",
+        rotate: 120,
     },
-  },
+    show: {
+        x: 0,
+        rotate: 0,
+        transition: {
+            type: "spring",
+            duration: 1.8,
+            delay: 0.5,
+        },
+    },
 });
 
 /**
@@ -293,22 +293,22 @@ export const dioramaAnimation = (direction) => ({
  * @type {object}
  */
 export const footerVariants = {
-  hidden: {
-    opacity: 0,
-    y: 50,
-    transition: {
-      type: 'spring',
-      stiffness: 300,
-      damping: 140,
+    hidden: {
+        opacity: 0,
+        y: 50,
+        transition: {
+            type: "spring",
+            stiffness: 300,
+            damping: 140,
+        },
     },
-  },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: 'spring',
-      stiffness: 80,
-      delay: 0.5,
+    show: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            type: "spring",
+            stiffness: 80,
+            delay: 2,
+        },
     },
-  },
 };

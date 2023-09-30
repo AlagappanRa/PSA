@@ -1,31 +1,25 @@
-import { useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import lottie from "lottie-web";
+import { useLottie } from "lottie-react";
+import animationData from "../assets/animation2.json";
+import { slideIn } from "../utils/motion";
 
 const CargoShipAnimation = () => {
-    const container = useRef(null);
+    const options = {
+        animationData,
+        loop: true,
+        autoplay: true,
+    };
 
-    useEffect(() => {
-        const animation = lottie.loadAnimation({
-            container: container.current,
-            renderer: "svg",
-            loop: true,
-            autoplay: true,
-            animationData: require("../assets/animation2.json"),
-        });
-
-        return () => {
-            animation.destroy();
-        };
-    }, []);
+    const { View } = useLottie(options);
 
     return (
         <motion.div
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            transition={{ duration: 2 }}
+            variants={slideIn("right", "spring", 0.2, 2)}
+            initial="hidden"
+            animate="show"
+            className="z-10 animation-wrapper"
         >
-            <div ref={container}></div>
+            <div className="z-10 ship-animation-container">{View}</div>
         </motion.div>
     );
 };
