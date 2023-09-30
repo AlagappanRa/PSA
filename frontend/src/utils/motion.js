@@ -83,7 +83,7 @@ export const staggerContainer = (staggerChildren, delayChildren) => ({
  */
 export const navVariants = {
     hidden: {
-        opacity: 0,
+        opacity: 1,
         y: -50,
         transition: {
             type: "spring",
@@ -308,7 +308,7 @@ export const footerVariants = {
         transition: {
             type: "spring",
             stiffness: 80,
-            delay: 2,
+            delay: 1,
         },
     },
 };

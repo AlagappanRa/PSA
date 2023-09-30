@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { navVariants } from "../utils/motion";
@@ -12,7 +12,7 @@ const Navbar = () => {
             initial="hidden"
             whileInView="show"
             viewport={{ once: true }}
-            className="w-full flex justify-between items-center bg-primary-black sm:px-8 px-4 py-4"
+            className="w-full flex justify-between items-center bg-primary sm:px-8 px-4 py-4"
         >
             {/* Logo */}
             <div className="md:flex-[0.5] flex-initial justify-center items-center text-white font-bold text-2xl">
