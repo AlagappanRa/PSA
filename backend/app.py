@@ -4,7 +4,6 @@ import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import PolynomialFeatures
 from sklearn.preprocessing import StandardScaler
 from pulp import LpMaximize, LpProblem, LpVariable, lpSum
 import joblib
@@ -30,8 +29,7 @@ try:
 except Exception as e:
     print(e)
 
-data = pd.read_csv("C:\\Users\\Ian\\Downloads\\berth_capacity,ship_size,cargo_volu.csv")
-
+#data = pd.read_csv("C:\\Users\\Ian\\Downloads\\berth_capacity,ship_size,cargo_volu.csv")
 
 @app.route("/upload", methods=["POST"])
 def upload_data():
@@ -105,13 +103,27 @@ def forecast_demand():
     # Convert the received JSON data to a DataFrame
     df = pd.DataFrame(data)
 
-    # Assume we are using a Random Forest model for this example
-    model = RandomForestRegressor()
-    model.fit(df.drop(columns=["demand"]), df["demand"])
+    # Retrieve the model from MongoDB
+    model_file = fs.find_one({"filename": "model.pkl"})
+    if model_file is None:
+        return jsonify({"error": "Model not found"})
 
+    # Save the model to a temporary file
+    with open("model.pkl", "wb") as f:
+        f.write(model_file.read())
+
+    # Load the model
+    model = joblib.load("model.pkl")
+
+    # Remove the temporary file
+    os.remove("model.pkl")
+
+    # Use the model for predictions
     future_demand = model.predict(df.drop(columns=["demand"]))
 
-    return jsonify({"future_demand": future_demand.tolist()})
+    final_answer = jsonify({"future_demand": future_demand.tolist()})
+    print(final_answer)
+    return final_answer
 
 
 @app.route("/optimize", methods=["POST"])
