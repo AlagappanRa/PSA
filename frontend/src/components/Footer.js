@@ -24,7 +24,7 @@ const Footer = () => {
             initial="hidden"
             whileInView="show"
             viewport={{ once: true }}
-            className="pt-20 sm:px-16 px-6 py-8 relative"
+            className="pt-20 px-6 py-8 sm:px-16 md:pt-0 xl:pt-10 relative"
         >
             <div className="footer-gradient" />
             <div className="2xl:max-w-[1280px] w-full mx-auto flex flex-col gap-8">

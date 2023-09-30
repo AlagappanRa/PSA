@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useLottie } from "lottie-react";
 import animationData from "../assets/shipAnimation.json";
