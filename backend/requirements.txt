@@ -8,3 +8,4 @@ joblib==1.*
 numpy==1.*
 pymongo==4.*
 python-dotenv==0.21.1
+Gunicorn
