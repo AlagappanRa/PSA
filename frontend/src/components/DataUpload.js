@@ -32,7 +32,10 @@ const DataUpload = ({ onUpload }) => {
             formData.append("file", file);
 
             try {
-                await axios.post("http://localhost:5000/upload", formData);
+                await axios.post(
+                    `${process.env.REACT_APP_SERVER_URL}/upload`,
+                    formData
+                );
                 // Handle successful upload, e.g., set a success message or do something else
             } catch (error) {
                 console.error("There was an error uploading the file!", error);

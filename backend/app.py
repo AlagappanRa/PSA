@@ -4,7 +4,9 @@ import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.model_selection import train_test_split
-from pulp import LpMaximize, LpProblem, LpVariable, lpSum, LpBinary
+from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import OneHotEncoder
+from pulp import LpMaximize, LpProblem, LpVariable, lpSum, LpBinary, LpMinimize, LpStatus
 import joblib
 from pymongo import MongoClient
 import gridfs
@@ -281,7 +283,6 @@ def optimize_resources():
     berth_capacity = df['berth_capacity'].tolist()
     berth_availability = df['berth_availability'].tolist()
 
-
     original_ships = ships.copy()
     assignments = []
     total_cargo_assigned = 0
@@ -326,14 +327,72 @@ def optimize_resources():
             key = f"{i},{j}"
             response_assignments[key] = value
 
+    # Calculate the Worst Case Time
+    worst_case_time = calculateWorstCaseTime(ships, berth_capacity, berth_availability)
+    print("Worst Case Time:", worst_case_time)
+
+    # Calculate the Utilization Rate
+    utilized_berths = sum(1 for value in response_assignments.values() if value == 1)
+    total_berths = len(berth_capacity)
+    utilization_rate = (utilized_berths / total_berths) * 100 if total_berths > 0 else 0
+
+    # Calculate Average Waiting Time (you may need more data for a more accurate calculation)
+    average_waiting_time = total_time_taken / len(ships) if ships else 0
+
+    # Calculate Efficiency Gain (here it's shown as a reduction in time, can also be calculated other ways)
+    efficiency_gain = ((worst_case_time - total_time_taken) / worst_case_time) * 100 if worst_case_time > 0 else 0
+
+    # Calculate Cargo-to-Time Ratio
+    cargo_to_time_ratio = total_cargo_assigned / total_time_taken if total_time_taken > 0 else 0
+
     response = {
-        "optimized_assignment": response_assignments, # Changed the key from optimized_assignments to optimized_assignment
+        "optimized_assignment": response_assignments, 
         "total_cargo_assigned": total_cargo_assigned,
         "total_time_taken": total_time_taken,
-        "average_ratio": average_ratio
+        "average_ratio": average_ratio,
+        "worst_case_time": worst_case_time,
+        "utilization_rate": utilization_rate,
+        "average_waiting_time": average_waiting_time,
+        "efficiency_gain": efficiency_gain,
+        "cargo_to_time_ratio": cargo_to_time_ratio
     }
 
     return jsonify(response)
+
+def calculateWorstCaseTime(ships, berth_capacity, berth_availability):
+    if not ships or all(a == 0 for a in berth_availability):
+        return 0
+
+    model = LpProblem(name="worst-case-ship-berth-allocation", sense=LpMinimize) 
+
+    x = {(i, j): LpVariable(name=f"x_{i}_{j}", cat=LpBinary) 
+         for i in range(len(ships)) 
+         for j in range(len(berth_capacity))}
+
+    model += lpSum(ships[i] / berth_capacity[j] * x[i, j] 
+                   for i in range(len(ships)) 
+                   for j in range(len(berth_capacity)) 
+                   if berth_availability[j] == 1), "Total_Cargo_to_Time_Ratio"
+
+    print("Objective Function before solving:", model.objective)  # New print statement
+
+    for i in range(len(ships)):
+        model += lpSum(x[i, j] for j in range(len(berth_capacity)) if berth_availability[j] == 1) <= 1
+
+    for j in range(len(berth_capacity)):
+        if berth_availability[j] == 1:
+            model += lpSum(x[i, j] for i in range(len(ships))) <= 1
+
+    model.solve()
+
+    worst_case_time = sum((ships[i] / berth_capacity[j]) * int(x[i, j].value()) 
+                          for i in range(len(ships)) 
+                          for j in range(len(berth_capacity)) 
+                          if berth_availability[j] == 1 and x[i, j].value() is not None)
+
+    print("Worst Case Time after solving:", worst_case_time)  # New print statement
+
+    return worst_case_time
 
 
 if __name__ == "__main__":

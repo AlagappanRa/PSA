@@ -11,7 +11,7 @@ const TrainModel = () => {
     const trainModel = async () => {
         try {
             const response = await axios.post(
-                "http://localhost:5000/train",
+                `${process.env.REACT_APP_SERVER_URL}/train`,
                 {}
             );
             console.log(response.data);
