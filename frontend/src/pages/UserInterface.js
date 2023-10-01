@@ -2,8 +2,24 @@ import DataUpload from "../components/DataUpload";
 import DemandForecast from "../components/DemandForecast";
 import TrainModel from "../components/TrainModel";
 import { Card, CardContent, Typography, Grid } from "@mui/material";
+import axios from "axios";
+import { useState } from "react";
 
 const UserInterface = () => {
+    const [forecast, setForecast] = useState(null);
+    
+    const getForecast = async (formData) => {
+        try {
+            const response = await axios.post(
+                "http://localhost:5000/forecast",
+                formData
+            );
+            setForecast(response.data);
+        } catch (error) {
+            console.error("There was an error fetching the forecast!", error);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-primary p-4">
             <Grid container spacing={4}>
@@ -54,7 +70,10 @@ const UserInterface = () => {
                                 Input today's data to get a demand forecast for
                                 tomorrow!
                             </Typography>
-                            <DemandForecast />
+                            <DemandForecast 
+                                getForecast={getForecast} 
+                                forecast={forecast} 
+                            />
                         </CardContent>
                     </Card>
                 </Grid>
