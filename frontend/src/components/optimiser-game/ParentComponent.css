@@ -1,9 +1,0 @@
-/* ParentComponent.css */
-.ship {
-  transition: all 0.3s ease-in-out;
-}
-
-.ship.assigned {
-  transform: scale(1.1);
-  background-color: lightgreen;
-}

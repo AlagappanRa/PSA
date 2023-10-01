@@ -30,10 +30,10 @@ const Navbar = () => {
                     to="/demand-forecast"
                     className="mx-6 hover:text-gray-300 transition duration-300"
                 >
-                    Forecast Tommorow's Demand 
+                    Forecast Demand
                 </Link>
                 <Link
-                    to="/optimize-ship"  // Add this new Link
+                    to="/optimize-ship" // Add this new Link
                     className="mx-6 hover:text-gray-300 transition duration-300"
                 >
                     Optimize Ship Supply Allocation

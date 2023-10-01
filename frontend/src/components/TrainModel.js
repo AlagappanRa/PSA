@@ -1,22 +1,50 @@
-import React from 'react';
-import axios from 'axios';
-import Button from '@mui/material/Button';
+import React from "react";
+import axios from "axios";
+import Button from "@mui/material/Button";
+import Box from "@mui/material/Box";
+import Alert from "@mui/material/Alert";
+import { useState } from "react";
 
 const TrainModel = () => {
-  const trainModel = async () => {
-    try {
-      const response = await axios.post('http://localhost:5000/train', {/* your training data */});
-      console.log(response.data);
-    } catch (error) {
-      console.error('There was an error training the model!', error);
-    }
-  };
+    const [error, setError] = useState("");
 
-  return (
-    <Button variant="contained" color="primary" onClick={trainModel}>
-      Train Model
-    </Button>
-  );
+    const trainModel = async () => {
+        try {
+            const response = await axios.post(
+                "http://localhost:5000/train",
+                {}
+            );
+            console.log(response.data);
+        } catch (error) {
+            console.error("There was an error training the model!", error);
+            setError("There was an error training the model!");
+        }
+    };
+
+    return (
+        <Box
+            sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                width: "100%",
+            }}
+        >
+            <Button
+                variant="contained"
+                color="primary"
+                onClick={trainModel}
+                sx={{ width: "100%", height: "100%" }}
+            >
+                Train Model
+            </Button>
+            {error && (
+                <Alert severity="error" sx={{ width: "100%", marginTop: 2 }}>
+                    {error}
+                </Alert>
+            )}
+        </Box>
+    );
 };
 
 export default TrainModel;
