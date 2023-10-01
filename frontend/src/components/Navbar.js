@@ -36,7 +36,7 @@ const Navbar = () => {
                     to="/optimize-ship" // Add this new Link
                     className="mx-6 hover:text-gray-300 transition duration-300"
                 >
-                    Optimize Ship Supply Allocation
+                    Optimize Supply Allocation
                 </Link>
             </div>
         </motion.nav>
