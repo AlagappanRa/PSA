@@ -124,6 +124,15 @@ def train_model():
 
     best_model = max(models, key=lambda model: model.fit(x_train, y_train).score(x_test, y_test))
 
+    if isinstance(best_model, LinearRegression):
+    # If the best model is linear regression, calculate feature importance from coefficients
+        coefs = best_model.coef_
+        feature_importances = abs(coefs) / sum(abs(coefs))
+    else:
+        # For tree-based models, extract feature importances directly
+        feature_importances = best_model.feature_importances_.tolist()
+
+
     if hasattr(best_model, "feature_importances_"):
         feature_importances = best_model.feature_importances_.tolist()
 
