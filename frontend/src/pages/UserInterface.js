@@ -1,6 +1,7 @@
 import DataUpload from "../components/DataUpload";
 import DemandForecast from "../components/DemandForecast";
 import TrainModel from "../components/TrainModel";
+import ForecastCharts from "../components/ForecastCharts";
 import { Card, CardContent, Typography, Grid } from "@mui/material";
 import axios from "axios";
 import { useState } from "react";

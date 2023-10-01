@@ -26,16 +26,16 @@ const ForecastPaper = styled(Paper)(() => ({
 }));
 
 const DemandForecast = ({ getForecast, forecast }) => {
-    const [formData, setFormData] = useState({
-        berth_capacity: "400",
-        ship_size: "80",
-        cargo_volume: "4000",
-        equipment_availability: "40",
-        worker_availability: "21",
-        operational_costs: "4000",
-        tide_levels: "3.0",
-        ship_arrival_delays: "40",
-        demand: "160",
+    const [formData, setFormData] = useState({ 
+        "berth_capacity": 325,
+        "ship_size": 75.23,
+        "cargo_volume": 4500.87,
+        "equipment_availability": 30.75,
+        "worker_availability": 18,
+        "operational_costs": 3600.52,
+        "tide_levels": 2.9,
+        "ship_arrival_delays": 25,
+        "demand": 160
     });
 
     const handleInputChange = (e) => {
