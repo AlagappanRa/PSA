@@ -204,7 +204,7 @@ def forecast_demand():
         return jsonify({"error": "No data provided"})
 
     # Convert the received JSON data to a DataFrame
-    df = pd.DataFrame(data)
+    df = pd.DataFrame(data, index=[0])
 
     # Handle categorical data
     encoder = OneHotEncoder(
@@ -269,85 +269,122 @@ def forecast_demand():
 @app.route("/optimize", methods=["POST"])
 def optimize_resources():
     """
-    Optimize the allocation of ships to berths to maximize the total ratio of cargo handled to time taken.
+    This method optimizes the allocation of ships to berths to maximize the total ratio of cargo handled to time taken,
+    based on the input data provided in a CSV file.
 
-    ### Expected Input JSON:
+    ### Expected CSV format:
+    ships,berth_capacity,berth_availability
+    10000,5000,1
+    15000,6000,1
+    20000,7000,1
+    25000,8000,1
+    12000,5500,0
+    13000,6500,1
+    18000,7500,1
+    19000,8500,1
+    11000,5200,0
+    16000,7200,1
+
+    ### Columns:
+    - ships: A list of cargo volumes of ships.
+    - berth_capacity: A list of capacities of berths.
+    - berth_availability: A list of availability of berths (1 for available, 0 for not available).
+
+    ### Output JSON:
     {
-        "ships": [5000, 6000, 7000],  # List of cargo volumes of ships
-        "berth_capacity": [1000, 2000, 3000],  # List of capacities of berths
-        "berth_availability": [1, 0, 1]  # List of availability of berths (1 for available, 0 for not available)
+        "average_ratio": 6758.430418839712,
+        "optimized_assignments": "[{(0, 0): 0, (0, 1): 0, (0, 2): 0, (0, 3): 0, (0, 5): 0, (0, 6): 0, (0, 7): 0, (0, 9): 0, (1, 0): 0, (1, 1): 0, (1, 2): 0, (1, 3): 0, (1, 5): 0, (1, 6): 1, (1, 7): 0, (1, 9): 0, (2, 0): 0, (2, 1): 0, (2, 2): 0, (2, 3): 0, (2, 5): 0, (2, 6): 0, (2, 7): 0, (2, 9): 1, (3, 0): 0, (3, 1): 1, (3, 2): 0, (3, 3): 0, (3, 5): 0, (3, 6): 0, (3, 7): 0, (3, 9): 0, (4, 0): 0, (4, 1): 0, (4, 2): 0, (4, 3): 0, (4, 5): 1, (4, 6): 0, (4, 7): 0, (4, 9): 0, (5, 0): 0, (5, 1): 0, (5, 2): 1, (5, 3): 0, (5, 5): 0, (5, 6): 0, (5, 7): 0, (5, 9): 0, (6, 0): 0, (6, 1): 0, (6, 2): 0, (6, 3): 0, (6, 5): 0, (6, 6): 0, (6, 7): 1, (6, 9): 0, (7, 0): 1, (7, 1): 0, (7, 2): 0, (7, 3): 0, (7, 5): 0, (7, 6): 0, (7, 7): 0, (7, 9): 0, (8, 0): 0, (8, 1): 0, (8, 2): 0, (8, 3): 0, (8, 5): 0, (8, 6): 0, (8, 7): 0, (8, 9): 0, (9, 0): 0, (9, 1): 0, (9, 2): 0, (9, 3): 1, (9, 5): 0, (9, 6): 0, (9, 7): 0, (9, 9): 0}, {(0, 0): 0, (0, 1): 1, (0, 2): 0, (0, 3): 0, (0, 5): 0, (0, 6): 0, (0, 7): 0, (0, 9): 0, (1, 0): 0, (1, 1): 0, (1, 2): 0, (1, 3): 0, (1, 5): 0, (1, 6): 0, (1, 7): 1, (1, 9): 0}]",
+        "total_cargo_assigned": 159000,
+        "total_time_taken": 23.526172520290167
     }
 
-    ### Expected Output JSON:
-    {
-        "optimized_assignment": "{(0, 0): 1, (1, 2): 1}",  # JSON string of dictionary representing the optimized assignment of ships to berths
-        "total_cargo_assigned": 12000,  # Total cargo volume assigned to available berths
-        "total_time_taken": 12,  # Total time taken to handle the assigned cargo
-        "average_ratio": 1000,  # Average ratio of cargo handled to time taken
-        "optimized_by_percentage": 20  # Improvement percentage compared to a baseline allocation
-    }
-
-    ### Note:
+    ### Notes:
     - The keys in the "optimized_assignment" dictionary are tuples where the first element is the index of the ship and the second element is the index of the berth.
     - The values in the "optimized_assignment" dictionary are binary, where 1 indicates that the ship is assigned to the berth, and 0 indicates otherwise.
+    - The file should be uploaded with the POST request under the 'file' key.
     """
-    data = request.json
-    if not data:
+    """
+    csv_data = request.data.decode('utf-8')
+    
+    if not csv_data:
         return jsonify({"error": "No data provided"})
 
-    ships = data["ships"]  # List of cargo volumes of ships
-    berth_capacity = data["berth_capacity"]  # List of capacities of berths
-    berth_availability = data[
-        "berth_availability"
-    ]  # List of availability of berths (1 for available, 0 for not available)
+    data = StringIO(csv_data)
+    df = pd.read_csv(data)
+    
+    if df is None or df.empty:
+        return jsonify({"error": "Could not read the data"})
+    """
+    
+    if 'file' not in request.files:
+        return jsonify({"error": "No file provided"})
 
-    model = LpProblem(name="ship-berth-allocation", sense=LpMaximize)
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "No file selected"})
 
-    # Create binary decision variables
-    x = {
-        (i, j): LpVariable(name=f"x_{i}_{j}", cat=LpBinary)
-        for i in range(len(ships))
-        for j in range(len(berth_capacity))
+    df = pd.read_csv(file)
+    
+    if df is None:
+        return jsonify({"error": "Could not read the file"})
+
+    ships = df['ships'].tolist()
+    berth_capacity = df['berth_capacity'].tolist()
+    berth_availability = df['berth_availability'].tolist()
+
+
+    original_ships = ships.copy()
+    assignments = []
+    total_cargo_assigned = 0
+    total_time_taken = 0
+
+    while ships:
+        model = LpProblem(name="ship-berth-allocation", sense=LpMaximize)
+
+        x = {(i, j): LpVariable(name=f"x_{i}_{j}", cat=LpBinary) for i in range(len(ships)) for j in range(len(berth_capacity))}
+
+        model += lpSum(ships[i] * x[i, j] for i in range(len(ships)) for j in range(len(berth_capacity)) if berth_availability[j] == 1), "Total_Cargo"
+
+        for i in range(len(ships)):
+            model += lpSum(x[i, j] for j in range(len(berth_capacity)) if berth_availability[j] == 1) <= 1
+
+        for j in range(len(berth_capacity)):
+            if berth_availability[j] == 1:
+                model += lpSum(x[i, j] for i in range(len(ships))) <= 1
+
+        model.solve()
+
+        assignment = {(i, j): int(x[i, j].value()) for i in range(len(ships)) for j in range(len(berth_capacity)) if berth_availability[j] == 1}
+        assignments.append(assignment)
+
+        assigned_ship_indices = [i for i, j in assignment.keys() if assignment[(i, j)] == 1]
+        
+        total_cargo_assigned += sum(original_ships[i] * int(x[i, j].value()) for i, j in assignment.keys() if assignment[(i, j)] == 1)
+        total_time_taken += sum((original_ships[i] / berth_capacity[j]) * int(x[i, j].value()) for i, j in assignment.keys() if assignment[(i, j)] == 1)
+        
+        ships = [s for i, s in enumerate(ships) if i not in assigned_ship_indices]
+        original_ships = ships.copy()
+
+        if not ships or all(a == 0 for a in berth_availability):
+            break
+
+    average_ratio = total_cargo_assigned / total_time_taken if total_time_taken != 0 else 0
+
+    response_assignments = {}
+    for assignment in assignments:
+        for (i, j), value in assignment.items():
+            # Convert tuple (i, j) to a string format "i,j"
+            key = f"{i},{j}"
+            response_assignments[key] = value
+
+    response = {
+        "optimized_assignment": response_assignments, # Changed the key from optimized_assignments to optimized_assignment
+        "total_cargo_assigned": total_cargo_assigned,
+        "total_time_taken": total_time_taken,
+        "average_ratio": average_ratio
     }
 
-    # Objective function: maximize the total ratio of cargo handled to time taken
-    model += (
-        lpSum(
-            ships[i] / (ships[i] / berth_capacity[j]) * x[i, j]
-            for i in range(len(ships))
-            for j in range(len(berth_capacity))
-            if berth_availability[j] == 1
-        ),
-        "Total_Ratio",
-    )
-
-    # Each ship is assigned to exactly one available berth
-    for i in range(len(ships)):
-        model += (
-            lpSum(
-                x[i, j]
-                for j in range(len(berth_capacity))
-                if berth_availability[j] == 1
-            )
-            == 1
-        )
-
-    # Each available berth can handle at most one ship
-    for j in range(len(berth_capacity)):
-        if berth_availability[j] == 1:
-            model += lpSum(x[i, j] for i in range(len(ships))) <= 1
-
-    model.solve()
-
-    # Get the optimal assignment of ships to berths
-    assignment = {
-        (i, j): int(x[i, j].value())
-        for i in range(len(ships))
-        for j in range(len(berth_capacity))
-        if berth_availability[j] == 1
-    }
-
-    return jsonify({"optimized_assignment": assignment})
+    return jsonify(response)
 
 
 if __name__ == "__main__":

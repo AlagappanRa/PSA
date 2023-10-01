@@ -17,7 +17,7 @@ const theme = createTheme({
     },
 });
 
-const DataUpload = () => {
+const DataUpload = ({ onUpload }) => {
     const [file, setFile] = useState(null);
     const [error, setError] = useState("");
 
@@ -25,19 +25,21 @@ const DataUpload = () => {
         setFile(event.target.files[0]);
     };
 
-    const onUpload = async () => {
-        const formData = new FormData();
-        formData.append("file", file);
+    const upload = async () => {
+        if (!onUpload) {
+            // Check if onUpload prop is provided
+            const formData = new FormData();
+            formData.append("file", file);
 
-        try {
-            const response = await axios.post(
-                "http://localhost:5000/upload",
-                formData
-            );
-            console.log(response.data);
-        } catch (error) {
-            console.error("There was an error uploading the file!", error);
-            setError("There was an error uploading the file!");
+            try {
+                await axios.post("http://localhost:5000/upload", formData);
+                // Handle successful upload, e.g., set a success message or do something else
+            } catch (error) {
+                console.error("There was an error uploading the file!", error);
+                setError("There was an error uploading the file!");
+            }
+        } else if (file) {
+            onUpload(file); // If onUpload prop is provided and file is selected, call onUpload function
         }
     };
 
@@ -80,7 +82,7 @@ const DataUpload = () => {
                             <Button
                                 variant="contained"
                                 color="secondary"
-                                onClick={onUpload}
+                                onClick={upload}
                                 disabled={!file}
                             >
                                 Upload Data
@@ -92,8 +94,7 @@ const DataUpload = () => {
                                 color="text.secondary"
                                 align="center"
                             >
-                                Upload your data file here then click train
-                                model! Ensure that the file is in CSV format.
+                                Upload your data file here!
                             </Typography>
                         </Grid>
                     </Grid>

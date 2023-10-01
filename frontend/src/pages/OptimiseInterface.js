@@ -1,8 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import axios from "axios";
 import {
-    TextField,
-    Button,
     Typography,
     Container,
     Grid,
@@ -13,40 +11,25 @@ import {
     TableHead,
     TableRow,
     Paper,
+    Card,
+    CardContent,
+    Box,
 } from "@mui/material";
 import { Bar } from "react-chartjs-2";
-import Chart from "chart.js/auto";
+import "chart.js/auto";
+import DataUpload from "../components/DataUpload";
 
 function OptimiseInterface() {
-    const [formData, setFormData] = useState({
-        ships: "",
-        berth_capacity: "",
-        berth_availability: "",
-    });
-
     const [results, setResults] = useState(null);
-    const [chartInstance, setChartInstance] = useState(null);
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
-    };
-
-    const handleSubmit = async () => {
-        const ships = formData.ships.split(",").map(Number);
-        const berth_capacity = formData.berth_capacity.split(",").map(Number);
-        const berth_availability = formData.berth_availability
-            .split(",")
-            .map(Number);
+    const onUpload = async (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
 
         try {
             const response = await axios.post(
                 "http://127.0.0.1:5000/optimize",
-                {
-                    ships,
-                    berth_capacity,
-                    berth_availability,
-                }
+                formData
             );
             setResults(response.data);
         } catch (error) {
@@ -89,112 +72,66 @@ function OptimiseInterface() {
         ],
     };
 
-    useEffect(() => {
-        return () => {
-            if (chartInstance) {
-                chartInstance.destroy();
-            }
-        };
-    }, [chartInstance]);
-
     return (
         <Container>
-            <Typography variant="h4" gutterBottom>
-                Optimize Ship and Berth Allocation
-            </Typography>
-
-            <Grid container spacing={3}>
-                <Grid item xs={12} sm={4}>
-                    <TextField
-                        fullWidth
-                        variant="outlined"
-                        label="Ships"
-                        name="ships"
-                        value={formData.ships}
-                        onChange={handleInputChange}
-                        helperText="Enter comma separated values"
-                    />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                    <TextField
-                        fullWidth
-                        variant="outlined"
-                        label="Berth Capacities"
-                        name="berth_capacity"
-                        value={formData.berth_capacity}
-                        onChange={handleInputChange}
-                        helperText="Enter comma separated values"
-                    />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                    <TextField
-                        fullWidth
-                        variant="outlined"
-                        label="Berth Availability"
-                        name="berth_availability"
-                        value={formData.berth_availability}
-                        onChange={handleInputChange}
-                        helperText="Enter comma separated values (1 for available, 0 for not)"
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={handleSubmit}
-                    >
-                        Optimize
-                    </Button>
-                </Grid>
-            </Grid>
-
-            {results && (
-                <div style={{ marginTop: "20px" }}>
-                    <Typography variant="h6" gutterBottom>
-                        Optimization Results:
+            <Card>
+                <CardContent>
+                    <Typography variant="h4" gutterBottom align="center">
+                        Optimize Ship and Berth Allocation
                     </Typography>
 
-                    <TableContainer
-                        component={Paper}
-                        style={{ marginBottom: "20px" }}
-                    >
-                        <Table>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>Ship Index</TableCell>
-                                    <TableCell>Berth Index</TableCell>
-                                    <TableCell>Assignment</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {Object.entries(
-                                    results.optimized_assignment
-                                ).map(([key, value], index) => (
-                                    <TableRow key={index}>
-                                        <TableCell>
-                                            {key.split(",")[0].replace("(", "")}
-                                        </TableCell>
-                                        <TableCell>
-                                            {key
-                                                .split(",")[1]
-                                                .replace(")", "")
-                                                .trim()}
-                                        </TableCell>
-                                        <TableCell>{value}</TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
+                    <Box mt={3}>
+                        <Grid container spacing={3}>
+                            <DataUpload onUpload={onUpload} />
+                        </Grid>
+                    </Box>
 
-                    <Bar
-                        data={data}
-                        onElementsClick={(elems) => {
-                            setChartInstance(elems[0]._chart);
-                        }}
-                    />
-                </div>
-            )}
+                    {results && (
+                        <div style={{ marginTop: "20px" }}>
+                            <Typography variant="h6" gutterBottom>
+                                Optimization Results:
+                            </Typography>
+
+                            <TableContainer
+                                component={Paper}
+                                style={{ marginBottom: "20px" }}
+                            >
+                                <Table>
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell>Ship Index</TableCell>
+                                            <TableCell>Berth Index</TableCell>
+                                            <TableCell>Assignment</TableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {Object.entries(
+                                            results.optimized_assignment
+                                        ).map(([key, value], index) => (
+                                            <TableRow key={index}>
+                                                <TableCell>
+                                                    {key
+                                                        .split(",")[0]
+                                                        .replace("(", "")}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {key
+                                                        .split(",")[1]
+                                                        .replace(")", "")
+                                                        .trim()}
+                                                </TableCell>
+                                                <TableCell>{value}</TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
+
+                            <Bar data={data} />
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
         </Container>
     );
 }
