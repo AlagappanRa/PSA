@@ -1,15 +1,10 @@
 import React, { useState } from "react";
-import axios from "axios";
 import {
     TextField,
     Button,
     Typography,
     Grid,
     Paper,
-    FormControl,
-    InputLabel,
-    Select,
-    MenuItem,
 } from "@mui/material";
 import { styled } from "@mui/system";
 
@@ -30,19 +25,17 @@ const ForecastPaper = styled(Paper)(() => ({
     backgroundColor: "#f0f0f0",
 }));
 
-const DemandForecast = () => {
-    const [forecast, setForecast] = useState(null);
+const DemandForecast = ({ getForecast, forecast }) => {
     const [formData, setFormData] = useState({
-        berth_capacity: "",
-        ship_size: "",
-        cargo_volume: "",
-        equipment_availability: "",
-        worker_availability: "",
-        operational_costs: "",
-        demand: "",
-        weather_conditions: "",
-        tide_levels: "",
-        ship_arrival_delays: "",
+        berth_capacity: "400",
+        ship_size: "80",
+        cargo_volume: "4000",
+        equipment_availability: "40",
+        worker_availability: "21",
+        operational_costs: "4000",
+        tide_levels: "3.0",
+        ship_arrival_delays: "40",
+        demand: "160",
     });
 
     const handleInputChange = (e) => {
@@ -56,16 +49,8 @@ const DemandForecast = () => {
         setFormData((prevState) => ({ ...prevState, [name]: value }));
     };
 
-    const getForecast = async () => {
-        try {
-            const response = await axios.post(
-                "http://localhost:5000/forecast",
-                formData
-            );
-            setForecast(response.data.future_demand);
-        } catch (error) {
-            console.error("There was an error fetching the forecast!", error);
-        }
+    const fetchForecast = () => {
+        getForecast(formData);
     };
 
     return (
@@ -120,19 +105,6 @@ const DemandForecast = () => {
                         onChange={handleInputChange}
                         fullWidth
                     />
-                    <FormControl fullWidth>
-                        <InputLabel>Weather Conditions</InputLabel>
-                        <Select
-                            name="weather_conditions"
-                            value={formData.weather_conditions}
-                            onChange={handleInputChange}
-                        >
-                            <MenuItem value="sunny">Sunny</MenuItem>
-                            <MenuItem value="rainy">Rainy</MenuItem>
-                            <MenuItem value="cloudy">Cloudy</MenuItem>
-                        </Select>
-                    </FormControl>
-
                     <TextField
                         type="number"
                         name="tide_levels"
@@ -162,7 +134,7 @@ const DemandForecast = () => {
                     <Button
                         variant="contained"
                         color="secondary"
-                        onClick={getForecast}
+                        onClick={fetchForecast}
                         fullWidth
                     >
                         Get Demand Forecast
