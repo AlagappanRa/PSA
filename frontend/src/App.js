@@ -14,6 +14,7 @@ function App() {
             <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/data-upload" element={<UserInterface />} />
+                <Route path="/optimize-ship" element={<UserInterface />} />
             </Routes>
 
             <Footer />

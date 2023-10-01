@@ -27,16 +27,16 @@ const Navbar = () => {
             {/* Navigation Links for Desktop */}
             <div className="relative z-20 text-white md:flex hidden list-none flex-row justify-between items-center flex-initial text-l">
                 <Link
-                    to="/data-upload"
-                    className="mx-6 hover:text-gray-300 transition duration-300"
-                >
-                    Data Upload
-                </Link>
-                <Link
                     to="/demand-forecast"
                     className="mx-6 hover:text-gray-300 transition duration-300"
                 >
-                    Demand Forecast
+                    Forecast Tommorow's Demand 
+                </Link>
+                <Link
+                    to="/optimize-ship"  // Add this new Link
+                    className="mx-6 hover:text-gray-300 transition duration-300"
+                >
+                    Optimize Ship Supply Allocation
                 </Link>
             </div>
         </motion.nav>
