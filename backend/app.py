@@ -4,9 +4,7 @@ import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-from sklearn.preprocessing import OneHotEncoder
-from pulp import LpMaximize, LpProblem, LpVariable, lpSum, LpBinary, LpMinimize, LpStatus
+from pulp import LpMaximize, LpProblem, LpVariable, lpSum, LpBinary, LpMinimize
 import joblib
 from pymongo import MongoClient
 import gridfs
