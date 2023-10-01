@@ -40,13 +40,19 @@ const DemandForecast = () => {
         worker_availability: "",
         operational_costs: "",
         demand: "",
+        weather_conditions: "",
+        tide_levels: "",
+        ship_arrival_delays: "",
     });
 
     const handleInputChange = (e) => {
-        let { name, value } = e.target;
-        if (value < 0) {
+        let { name, value, type } = e.target;
+
+        // Conditionally check for number fields
+        if (type === "number" && +value < 0) {
             value = 0;
         }
+
         setFormData((prevState) => ({ ...prevState, [name]: value }));
     };
 
@@ -126,6 +132,25 @@ const DemandForecast = () => {
                             <MenuItem value="cloudy">Cloudy</MenuItem>
                         </Select>
                     </FormControl>
+
+                    <TextField
+                        type="number"
+                        name="tide_levels"
+                        label="Tide Level"
+                        value={formData.tide_levels}
+                        onChange={handleInputChange}
+                        fullWidth
+                    />
+
+                    <TextField
+                        type="number"
+                        name="ship_arrival_delays"
+                        label="Number of ships delayed"
+                        value={formData.ship_arrival_delays}
+                        onChange={handleInputChange}
+                        fullWidth
+                    />
+
                     <TextField
                         type="number"
                         name="demand"
