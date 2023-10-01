@@ -11,13 +11,15 @@ import joblib
 from pymongo import MongoClient
 import gridfs
 import os
+from dotenv import load_dotenv
 
 app = Flask(__name__)
 CORS(app)
 # CORS(app, support_credentials=True)
 app.config["CORS_HEADERS"] = "Content-Type"
 
-uri = "mongodb+srv://hoegpt:yJzfbBiMhZywyLRE@cluster0.fenmosq.mongodb.net/?retryWrites=true&w=majority&tlsAllowInvalidCertificates=true"
+load_dotenv()
+uri = os.getenv("MONGO")
 
 # Send a ping to confirm a successful connection
 try:
@@ -33,6 +35,11 @@ except Exception as e:
 # data = pd.read_csv("C:\\Users\\Ian\\Downloads\\berth_capacity,ship_size,cargo_volu.csv")
 data = None
 feature_importances = None
+
+
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify({"ok": "ok"})
 
 
 @app.route("/upload", methods=["POST"])
