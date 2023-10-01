@@ -11,14 +11,15 @@ import joblib
 from pymongo import MongoClient
 import gridfs
 import os
-import numpy as np
+from dotenv import load_dotenv
 
 app = Flask(__name__)
 CORS(app)
 # CORS(app, support_credentials=True)
 app.config["CORS_HEADERS"] = "Content-Type"
 
-uri = "mongodb+srv://hoegpt:yJzfbBiMhZywyLRE@cluster0.fenmosq.mongodb.net/?retryWrites=true&w=majority&tlsAllowInvalidCertificates=true"
+load_dotenv()
+uri = os.getenv("MONGO")
 
 # Send a ping to confirm a successful connection
 try:
@@ -31,15 +32,21 @@ try:
 except Exception as e:
     print(e)
 
-#data = pd.read_csv("C:\\Users\\Ian\\Downloads\\berth_capacity,ship_size,cargo_volu.csv")
+# data = pd.read_csv("C:\\Users\\Ian\\Downloads\\berth_capacity,ship_size,cargo_volu.csv")
 data = None
-feature_importances = None  
+feature_importances = None
+
+
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify({"ok": "ok"})
+
 
 @app.route("/upload", methods=["POST"])
 def upload_data():
     """
     Uploads a CSV file containing the dataset for demand forecasting.
-    
+
     Expected Input:
     A POST request with a CSV file attached. The CSV file should contain the following columns:
     - berth_capacity
@@ -52,13 +59,13 @@ def upload_data():
     - tide_levels
     - ship_arrival_delays
     - demand
-    
+
     Example CSV content:
     berth_capacity,ship_size,cargo_volume,equipment_availability,worker_availability,operational_costs,weather_conditions,tide_levels,ship_arrival_delays,demand
     100,50,1000,10,5,1000,sunny,2.5,10,100
     150,55,1500,15,7,1500,rainy,3.0,15,110
     ... (and so on)
-    
+
     Output:
     A JSON message indicating the successful upload and processing of the file, along with the data contained in the file.
     """
@@ -84,7 +91,7 @@ def upload_data():
 def train_model():
     """
     Trains the demand forecasting model using the provided dataset.
-    
+
     Expected Input JSON:
     {
         "berth_capacity": [100, 150, 200, 250, 300],
@@ -98,7 +105,7 @@ def train_model():
         "ship_arrival_delays": [10, 15, 20, 25, 30],
         "demand": [100, 110, 120, 130, 140]
     }
-    
+
     Output:
     A JSON message indicating the successful training and storage of the model in MongoDB.
     """
@@ -108,12 +115,14 @@ def train_model():
     df.dropna(inplace=True)
 
     # Handle categorical data
-    encoder = OneHotEncoder(sparse=False, handle_unknown='ignore')
-    weather_encoded = encoder.fit_transform(df[['weather_conditions']])
-    weather_df = pd.DataFrame(weather_encoded, columns=encoder.get_feature_names_out(['weather_conditions']))
+    encoder = OneHotEncoder(sparse=False, handle_unknown="ignore")
+    weather_encoded = encoder.fit_transform(df[["weather_conditions"]])
+    weather_df = pd.DataFrame(
+        weather_encoded, columns=encoder.get_feature_names_out(["weather_conditions"])
+    )
 
     # Drop the original 'weather_conditions' column and concatenate the encoded DataFrame
-    df.drop(columns='weather_conditions', inplace=True)
+    df.drop(columns="weather_conditions", inplace=True)
     df = pd.concat([df, weather_df], axis=1)
 
     x = df.drop(columns="demand")
@@ -143,7 +152,7 @@ def train_model():
     print(best_model.score(x_test, y_test))
 
     # Save feature importances if the model is tree-based
-    if hasattr(best_model, 'feature_importances_'):
+    if hasattr(best_model, "feature_importances_"):
         feature_importances = best_model.feature_importances_.tolist()
 
     joblib.dump(best_model, "model.pkl")
@@ -160,7 +169,7 @@ def train_model():
 def forecast_demand():
     """
     Forecasts future demand based on the provided current conditions.
-    
+
     Expected Input JSON:
     {
         "berth_capacity": 200,
@@ -174,7 +183,7 @@ def forecast_demand():
         "ship_arrival_delays": 20,
         "demand": 120
     }
-    
+
     Expected Output JSON:
     {
         "future_demand": [125],
@@ -185,8 +194,8 @@ def forecast_demand():
         },
         "feature_importances": [0.2, 0.3, 0.1, 0.15, 0.25]  # Example feature importances
     }
-    
-    The output includes the forecasted future demand, historical demand data, a comparison of the increase in demand and percentage increase, 
+
+    The output includes the forecasted future demand, historical demand data, a comparison of the increase in demand and percentage increase,
     and the feature importances from the trained model (if available).
     """
     global data, feature_importances
@@ -198,12 +207,16 @@ def forecast_demand():
     df = pd.DataFrame(data)
 
     # Handle categorical data
-    encoder = OneHotEncoder(sparse=False, handle_unknown='ignore')  # handle_unknown='ignore' is crucial here for unseen labels
-    weather_encoded = encoder.fit_transform(df[['weather_conditions']])
-    weather_df = pd.DataFrame(weather_encoded, columns=encoder.get_feature_names_out(['weather_conditions']))
+    encoder = OneHotEncoder(
+        sparse=False, handle_unknown="ignore"
+    )  # handle_unknown='ignore' is crucial here for unseen labels
+    weather_encoded = encoder.fit_transform(df[["weather_conditions"]])
+    weather_df = pd.DataFrame(
+        weather_encoded, columns=encoder.get_feature_names_out(["weather_conditions"])
+    )
 
     # Drop the original 'weather_conditions' column and concatenate the encoded DataFrame
-    df.drop(columns='weather_conditions', inplace=True)
+    df.drop(columns="weather_conditions", inplace=True)
     df = pd.concat([df, weather_df], axis=1)
 
     # Retrieve the model from MongoDB
@@ -226,19 +239,28 @@ def forecast_demand():
 
     # Calculate the increase in demand and the percentage increase
     historical_demand = df["demand"].tolist()
-    increase_in_demand = [future - historical for future, historical in zip(future_demand, historical_demand)]
-    percentage_increase = [(increase / historical) * 100 if historical != 0 else 0 
-                           for increase, historical in zip(increase_in_demand, historical_demand)]
+    increase_in_demand = [
+        future - historical
+        for future, historical in zip(future_demand, historical_demand)
+    ]
+    percentage_increase = [
+        (increase / historical) * 100 if historical != 0 else 0
+        for increase, historical in zip(increase_in_demand, historical_demand)
+    ]
 
     # Prepare the output JSON
     output = {
         "future_demand": future_demand.tolist(),
-        "historical_demand": data["demand"].tolist(),  # Accessing the global data variable for historical demand
+        "historical_demand": data[
+            "demand"
+        ].tolist(),  # Accessing the global data variable for historical demand
         "comparison": {
             "increase_in_demand": increase_in_demand,
-            "percentage_increase": percentage_increase
+            "percentage_increase": percentage_increase,
         },
-        "feature_importances": feature_importances if feature_importances else "Not available"  # Add feature importances to the output
+        "feature_importances": feature_importances
+        if feature_importances
+        else "Not available",  # Add feature importances to the output
     }
 
     return jsonify(output)
@@ -273,21 +295,42 @@ def optimize_resources():
     if not data:
         return jsonify({"error": "No data provided"})
 
-    ships = data['ships']  # List of cargo volumes of ships
-    berth_capacity = data['berth_capacity']  # List of capacities of berths
-    berth_availability = data['berth_availability']  # List of availability of berths (1 for available, 0 for not available)
+    ships = data["ships"]  # List of cargo volumes of ships
+    berth_capacity = data["berth_capacity"]  # List of capacities of berths
+    berth_availability = data[
+        "berth_availability"
+    ]  # List of availability of berths (1 for available, 0 for not available)
 
     model = LpProblem(name="ship-berth-allocation", sense=LpMaximize)
 
     # Create binary decision variables
-    x = {(i, j): LpVariable(name=f"x_{i}_{j}", cat=LpBinary) for i in range(len(ships)) for j in range(len(berth_capacity))}
+    x = {
+        (i, j): LpVariable(name=f"x_{i}_{j}", cat=LpBinary)
+        for i in range(len(ships))
+        for j in range(len(berth_capacity))
+    }
 
     # Objective function: maximize the total ratio of cargo handled to time taken
-    model += lpSum(ships[i] / (ships[i] / berth_capacity[j]) * x[i, j] for i in range(len(ships)) for j in range(len(berth_capacity)) if berth_availability[j] == 1), "Total_Ratio"
+    model += (
+        lpSum(
+            ships[i] / (ships[i] / berth_capacity[j]) * x[i, j]
+            for i in range(len(ships))
+            for j in range(len(berth_capacity))
+            if berth_availability[j] == 1
+        ),
+        "Total_Ratio",
+    )
 
     # Each ship is assigned to exactly one available berth
     for i in range(len(ships)):
-        model += lpSum(x[i, j] for j in range(len(berth_capacity)) if berth_availability[j] == 1) == 1
+        model += (
+            lpSum(
+                x[i, j]
+                for j in range(len(berth_capacity))
+                if berth_availability[j] == 1
+            )
+            == 1
+        )
 
     # Each available berth can handle at most one ship
     for j in range(len(berth_capacity)):
@@ -297,10 +340,15 @@ def optimize_resources():
     model.solve()
 
     # Get the optimal assignment of ships to berths
-    assignment = {(i, j): int(x[i, j].value()) for i in range(len(ships)) for j in range(len(berth_capacity)) if berth_availability[j] == 1}
+    assignment = {
+        (i, j): int(x[i, j].value())
+        for i in range(len(ships))
+        for j in range(len(berth_capacity))
+        if berth_availability[j] == 1
+    }
 
     return jsonify({"optimized_assignment": assignment})
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    app.run(host="0.0.0.0", port=5000)
