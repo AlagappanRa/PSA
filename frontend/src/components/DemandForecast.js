@@ -59,7 +59,7 @@ const DemandForecast = () => {
     const getForecast = async () => {
         try {
             const response = await axios.post(
-                "http://localhost:5000/forecast",
+                `${process.env.REACT_APP_SERVER_URL}/forecast`,
                 formData
             );
             setForecast(response.data.future_demand);
