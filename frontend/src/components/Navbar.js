@@ -20,7 +20,7 @@ const Navbar = () => {
                     to="/"
                     className="text-white hover:text-gray-300 transition duration-300"
                 >
-                    <h1>Nautical Traders</h1>
+                    <h1>Nautical Coders</h1>
                 </Link>
             </div>
 

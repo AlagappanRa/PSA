@@ -18,7 +18,7 @@ import {
 } from "@mui/material";
 import "chart.js/auto";
 import DataUpload from "../components/DataUpload";
-import { Bar, Doughnut, GaugeChart } from "react-chartjs-2";
+import { Doughnut } from "react-chartjs-2";
 
 function OptimiseInterface() {
     const [results, setResults] = useState(null);
@@ -38,36 +38,6 @@ function OptimiseInterface() {
         }
     };
 
-    const barData = {
-        labels: ["Total Cargo Assigned", "Total Time Taken"],
-        datasets: [
-            {
-                label: "",
-                data: results
-                    ? [
-                          results.total_cargo_assigned,
-                          results.total_time_taken,
-                          //   results.average_ratio,
-                          //   results.optimized_by_percentage,
-                      ]
-                    : [],
-                backgroundColor: [
-                    "rgba(255, 99, 132, 0.2)",
-                    "rgba(75, 192, 192, 0.2)",
-                    "rgba(255, 206, 86, 0.2)",
-                    "rgba(153, 102, 255, 0.2)",
-                ],
-                borderColor: [
-                    "rgba(255, 99, 132, 1)",
-                    "rgba(75, 192, 192, 1)",
-                    "rgba(255, 206, 86, 1)",
-                    "rgba(153, 102, 255, 1)",
-                ],
-                borderWidth: 1,
-            },
-        ],
-    };
-
     const pieData = {
         labels: ["Utilized Berths", "Unutilized Berths"],
         datasets: [
@@ -84,12 +54,12 @@ function OptimiseInterface() {
     const getAllocations = () => {
         if (!results) return [];
 
-        const allocations = new Array(10).fill("No berth allocated"); // Initialize an array with "No berth allocated" as default values
+        const allocations = new Array(10).fill("No berth allocated");
 
         Object.entries(results.optimized_assignment).forEach(([key, value]) => {
             if (value === 1) {
                 const [shipIndex, berthIndex] = key.split(",");
-                allocations[parseInt(shipIndex)] = `Berth ${berthIndex.trim()}`; // If a berth is allocated, update the value in the array
+                allocations[parseInt(shipIndex)] = `Berth ${berthIndex.trim()}`;
             }
         });
 
@@ -115,80 +85,76 @@ function OptimiseInterface() {
                     </Box>
 
                     {results && (
-                        <div style={{ marginTop: "20px" }}>
+                        <Box mt={3}>
                             <Typography variant="h6" gutterBottom>
                                 Optimized Berth Allocation:
                             </Typography>
-                            <TableContainer
-                                component={Paper}
-                                style={{ marginBottom: "20px" }}
-                            >
+                            <TableContainer component={Paper} sx={{ mb: 2 }}>
                                 <Table>
                                     <TableHead>
                                         <TableRow>
                                             <TableCell>Ship Index</TableCell>
-                                            <TableCell>
-                                                Allocation
-                                            </TableCell>{" "}
-                                            {/* Updated column name */}
+                                            <TableCell>Allocation</TableCell>
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
-                                        {allocations.map(
-                                            (allocation, index) => (
-                                                // Looping through allocations array to create the table rows
-                                                <TableRow key={index}>
-                                                    <TableCell>
-                                                        {index}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        {allocation}
-                                                    </TableCell>
-                                                </TableRow>
-                                            )
-                                        )}
+                                        {allocations.map((allocation, index) => (
+                                            <TableRow key={index}>
+                                                <TableCell>{index}</TableCell>
+                                                <TableCell>{allocation}</TableCell>
+                                            </TableRow>
+                                        ))}
                                     </TableBody>
                                 </Table>
                             </TableContainer>
-                            <Bar
-                                data={barData}
-                                options={{ responsive: true }}
-                            />
-                            <Typography
-                                variant="h6"
-                                gutterBottom
-                                style={{ marginTop: "20px" }}
-                            >
-                                Berth Utilization:
-                            </Typography>
-                            <Doughnut
-                                data={pieData}
-                                options={{ responsive: true }}
-                            />
-                            <Typography
-                                variant="h6"
-                                gutterBottom
-                                style={{ marginTop: "20px" }}
-                            >
-                                Efficiency Gain:
-                            </Typography>
-                            <CircularProgress
-                                variant="determinate"
-                                value={results.efficiency_gain}
-                            />{" "}
-                            {/* A CircularProgress component to show efficiency gain */}
-                            <Typography
-                                variant="h6"
-                                gutterBottom
-                                style={{ marginTop: "20px" }}
-                            >
-                                Cargo to Time Ratio:
-                            </Typography>
-                            <Typography variant="body2">
-                                {results.cargo_to_time_ratio.toFixed(2)}{" "}
-                                {/* Adjust the decimal places as needed */}
-                            </Typography>
-                        </div>
+
+      <Grid container spacing={2} alignItems="center">
+                                <Grid item xs={12} md={6}>
+                                    <Typography variant="h6" gutterBottom>
+                                        Berth Utilization:
+                                    </Typography>
+                                    <Box sx={{ mb: 3 }}>
+                                        <Doughnut data={pieData} />
+                                    </Box>
+                                </Grid>
+
+                                <Grid item xs={12} md={6}>
+                                    <Typography variant="h6" gutterBottom>
+                                        Other Metrics:
+                                    </Typography>
+                                    <TableContainer component={Paper} sx={{ mb: 3 }}>
+                                        <Table>
+                                            <TableBody>
+                                                <TableRow>
+                                                    <TableCell>Total Cargo Assigned</TableCell>
+                                                    <TableCell>{results.total_cargo_assigned}</TableCell>
+                                                </TableRow>
+                                                <TableRow>
+                                                    <TableCell>Total Time Taken</TableCell>
+                                                    <TableCell>{results.total_time_taken}</TableCell>
+                                                </TableRow>
+                                                {/* <TableRow>
+                                                    <TableCell>Efficiency Gain</TableCell>
+                                                    <TableCell>
+                                                        <CircularProgress 
+                                                            variant="determinate"
+                                                            value={results.efficiency_gain} 
+                                                        />
+                                                    </TableCell>
+                                                </TableRow> */}
+                                                <TableRow>
+                                                    <TableCell>Cargo to Time Ratio</TableCell>
+                                                    <TableCell>
+                                                        {results.cargo_to_time_ratio.toFixed(2)}
+                                                    </TableCell>
+                                                </TableRow>
+                                                {/* Add more metrics here as needed */}
+                                            </TableBody>
+                                        </Table>
+                                    </TableContainer>
+                                </Grid>
+                            </Grid>
+                        </Box>
                     )}
                 </CardContent>
             </Card>

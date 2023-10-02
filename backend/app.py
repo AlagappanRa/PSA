@@ -200,6 +200,15 @@ def forecast_demand():
     increase_in_demand = [float(future) - float(historical) for future, historical in zip(future_demand, historical_demand)]
     percentage_increase = [(increase / float(historical)) * 100 for increase, historical in zip(increase_in_demand, historical_demand)]
 
+    # Mapping feature names to their importances
+    features = [
+        "berth_capacity", "ship_size", "cargo_volume", 
+        "equipment_availability", "worker_availability", 
+        "operational_costs", "tide_levels", "ship_arrival_delays"
+    ]
+
+    feature_importances_dict = dict(zip(features, feature_importances)) if feature_importances else "Not available"
+
     output = {
         "future_demand": future_demand.tolist(),
         "historical_demand": historical_demand,
@@ -207,7 +216,7 @@ def forecast_demand():
             "increase_in_demand": increase_in_demand,
             "percentage_increase": percentage_increase
         },
-        "feature_importances": feature_importances if feature_importances else "Not available"
+        "feature_importances": feature_importances_dict  # Updated this line
     }
 
     os.remove("model.pkl")
@@ -217,11 +226,9 @@ def forecast_demand():
 
     # Clear the model from memory
     del model
-
     print("\n\n\n\n")
     print(output)
     return jsonify(output)
-
 
 
 @app.route("/optimize", methods=["POST"])

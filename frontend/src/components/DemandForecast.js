@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/system";
 import axios from "axios";
-import ForecastCharts from "./ForecastCharts";  // Import ForecastCharts here
+import ForecastCharts from "./ForecastCharts";
 
 const StyledPaper = styled(Paper)(() => ({
     padding: 2,
@@ -16,20 +16,9 @@ const StyledPaper = styled(Paper)(() => ({
     color: "#12263A",
 }));
 
-const StyledButton = styled(Button)(() => ({
-    marginTop: 2,
-    width: "100%",
-}));
-
-const ForecastPaper = styled(Paper)(() => ({
-    marginTop: 2,
-    padding: 2,
-    backgroundColor: "#f0f0f0",
-}));
-
 const DemandForecast = () => {
     const [forecast, setForecast] = useState(null);
-    const [formData, setFormData] = useState({ 
+    const [formData, setFormData] = useState({
         "berth_capacity": 325,
         "ship_size": 75.23,
         "cargo_volume": 4500.87,
@@ -44,7 +33,6 @@ const DemandForecast = () => {
     const handleInputChange = (e) => {
         let { name, value, type } = e.target;
 
-        // Conditionally check for number fields
         if (type === "number" && +value < 0) {
             value = 0;
         }
@@ -64,15 +52,15 @@ const DemandForecast = () => {
         }
     };
 
-    const fetchForecast = () => {
-        getForecast(formData);
-    };
-
     return (
         <Grid container spacing={3}>
-            <Grid item xs={12}>
+            <Grid item xs={12} md={6}>
                 <StyledPaper>
+                    <Typography variant="h6">
+                        Input today's information
+                    </Typography>
                     <TextField
+                        style={{ marginBottom: '20px' }}
                         type="number"
                         name="berth_capacity"
                         label="Berth Capacity"
@@ -81,6 +69,7 @@ const DemandForecast = () => {
                         fullWidth
                     />
                     <TextField
+                        style={{ marginBottom: '20px' }}
                         type="number"
                         name="ship_size"
                         label="Ship Size"
@@ -89,6 +78,7 @@ const DemandForecast = () => {
                         fullWidth
                     />
                     <TextField
+                        style={{ marginBottom: '20px' }}
                         type="number"
                         name="cargo_volume"
                         label="Cargo Volume"
@@ -97,6 +87,7 @@ const DemandForecast = () => {
                         fullWidth
                     />
                     <TextField
+                        style={{ marginBottom: '20px' }}
                         type="number"
                         name="equipment_availability"
                         label="Equipment Availability"
@@ -105,6 +96,7 @@ const DemandForecast = () => {
                         fullWidth
                     />
                     <TextField
+                        style={{ marginBottom: '20px' }}
                         type="number"
                         name="worker_availability"
                         label="Worker Availability"
@@ -113,6 +105,7 @@ const DemandForecast = () => {
                         fullWidth
                     />
                     <TextField
+                        style={{ marginBottom: '20px' }}
                         type="number"
                         name="operational_costs"
                         label="Operational Costs"
@@ -121,6 +114,7 @@ const DemandForecast = () => {
                         fullWidth
                     />
                     <TextField
+                        style={{ marginBottom: '20px' }}
                         type="number"
                         name="tide_levels"
                         label="Tide Level"
@@ -128,8 +122,8 @@ const DemandForecast = () => {
                         onChange={handleInputChange}
                         fullWidth
                     />
-
                     <TextField
+                        style={{ marginBottom: '20px' }}
                         type="number"
                         name="ship_arrival_delays"
                         label="Number of ships delayed"
@@ -137,8 +131,8 @@ const DemandForecast = () => {
                         onChange={handleInputChange}
                         fullWidth
                     />
-
                     <TextField
+                        style={{ marginBottom: '20px' }}
                         type="number"
                         name="demand"
                         label="Demand"
@@ -157,13 +151,11 @@ const DemandForecast = () => {
                 </StyledPaper>
             </Grid>
             {forecast && (
-                <Grid item xs={12}>
-                    <ForecastPaper>
-                        <Typography variant="h6">
-                            Forecasted Demand: {forecast.future_demand}
-                        </Typography>
-                    </ForecastPaper>
-                    <ForecastCharts forecast={forecast} /> 
+                <Grid item xs={12} md={6}>
+                    <Typography variant="h6" align="center">
+                        Get tomorrow's demand forecast
+                    </Typography>
+                    <ForecastCharts forecast={forecast} />
                 </Grid>
             )}
         </Grid>
