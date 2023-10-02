@@ -23,7 +23,7 @@ pytz==2023.3.post1
 scikit-learn==1.0
 scipy==1.7.0
 six==1.16.0
-statsmodels==3.0.0
+statsmodels==0.11.0
 threadpoolctl==3.2.0
 urllib3==2.0.5
 Werkzeug==3.0.0
