@@ -7,6 +7,8 @@ import {
     Paper,
 } from "@mui/material";
 import { styled } from "@mui/system";
+import axios from "axios";
+import ForecastCharts from "./ForecastCharts";  // Import ForecastCharts here
 
 const StyledPaper = styled(Paper)(() => ({
     padding: 2,
@@ -25,7 +27,8 @@ const ForecastPaper = styled(Paper)(() => ({
     backgroundColor: "#f0f0f0",
 }));
 
-const DemandForecast = ({ getForecast, forecast }) => {
+const DemandForecast = () => {
+    const [forecast, setForecast] = useState(null);
     const [formData, setFormData] = useState({ 
         "berth_capacity": 325,
         "ship_size": 75.23,
@@ -47,6 +50,18 @@ const DemandForecast = ({ getForecast, forecast }) => {
         }
 
         setFormData((prevState) => ({ ...prevState, [name]: value }));
+    };
+
+    const getForecast = async () => {
+        try {
+            const response = await axios.post(
+                "http://localhost:5000/forecast",
+                formData
+            );
+            setForecast(response.data);
+        } catch (error) {
+            console.error("There was an error fetching the forecast!", error);
+        }
     };
 
     const fetchForecast = () => {
@@ -134,7 +149,7 @@ const DemandForecast = ({ getForecast, forecast }) => {
                     <Button
                         variant="contained"
                         color="secondary"
-                        onClick={fetchForecast}
+                        onClick={getForecast}
                         fullWidth
                     >
                         Get Demand Forecast
@@ -145,9 +160,10 @@ const DemandForecast = ({ getForecast, forecast }) => {
                 <Grid item xs={12}>
                     <ForecastPaper>
                         <Typography variant="h6">
-                            Forecasted Demand: {forecast}
+                            Forecasted Demand: {forecast.future_demand}
                         </Typography>
                     </ForecastPaper>
+                    <ForecastCharts forecast={forecast} /> 
                 </Grid>
             )}
         </Grid>

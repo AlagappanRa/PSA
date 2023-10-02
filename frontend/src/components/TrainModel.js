@@ -22,14 +22,11 @@ const TrainModel = () => {
     };
 
     return (
-        <Box
-            sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                width: "100%",
-            }}
-        >
+        <Box sx={{ 
+            display: "flex", 
+            flexDirection: "column", 
+            alignItems: "center" 
+        }}>
             <Button
                 variant="contained"
                 color="primary"

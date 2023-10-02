@@ -53,16 +53,9 @@ const DataUpload = ({ onUpload }) => {
 
     return (
         <Card>
-            <CardHeader title="Data Upload" subheader={date} align="center" />
             <CardContent>
                 <ThemeProvider theme={theme}>
-                    <Grid
-                        container
-                        spacing={2}
-                        direction="column"
-                        alignItems="center"
-                        justifyContent="center"
-                    >
+                    <Grid container spacing={2} direction="column" alignItems="center">
                         <Grid item xs={12}>
                             <input
                                 accept="*/*"
