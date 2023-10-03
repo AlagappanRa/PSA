@@ -80,7 +80,7 @@ def upload_data():
     df = pd.read_csv(file.stream)
     global data
     data = df
-    print(data)
+    print(data if data is not None else "No data")
 
     return jsonify(
         {"message": "File uploaded and processed successfully", "data": df.to_dict()}

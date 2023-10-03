@@ -29,7 +29,7 @@ function OptimiseInterface() {
 
         try {
             const response = await axios.post(
-                "http://127.0.0.1:5000/optimize",
+                `${process.env.REACT_APP_SERVER_URL}/optimize`,
                 formData
             );
             setResults(response.data);

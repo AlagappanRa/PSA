@@ -67,6 +67,7 @@ const DataUpload = ({ onUpload, sampleData }) => {
   const [file, setFile] = useState(null);
   const [error, setError] = useState('');
   const [data, setData] = useState([]);
+  const [csvData, setCsvData] = useState('');
 
   const onFileChange = (event) => {
     setFile(event.target.files[0]);
@@ -82,136 +83,155 @@ const DataUpload = ({ onUpload, sampleData }) => {
   };
 
   const upload = async () => {
-    if (!onUpload) {
-      const formData = new FormData();
-      formData.append('file', file);
+    const formData = new FormData();
 
-      try {
-        await axios.post(
-          `${process.env.REACT_APP_SERVER_URL}/upload`,
-          formData
-        );
-        setError(''); // Clear any previous error messages
-      } catch (error) {
-        console.error('There was an error uploading the file!', error);
-        setError('There was an error uploading the file!');
-      }
+    if (csvData) {
+      const blob = new Blob([csvData], { type: 'text/csv' });
+      formData.append('file', blob, 'data.csv');
+      console.log("Form data is : " + formData)
     } else if (file) {
-      onUpload(file);
+      console.log("File is : " + file)
+      formData.append('file', file);
+    }
+
+    console.log("Total print: " + formData)
+
+    try {
+      await axios.post(
+        `${process.env.REACT_APP_SERVER_URL}/upload`,
+        formData
+      );
+      setError('');
+
+      // Invoke the onUpload prop here
+      if (onUpload) {
+        onUpload(file || csvData);
+      }
+    } catch (error) {
+      console.error('There was an error uploading the file!', error);
+      setError('There was an error uploading the file!');
     }
   };
 
-  const useSampleData = () => {
+const useSampleData = () => {
+    let csv;
     if (sampleData === "demand_forecast") {
-    Papa.parse(sampleCSV.trim(), {
-      header: true,
-      complete: (result) => {
-        setData(result.data);
-      },
-    });
-} else if (sampleData === "optimise") {
-    Papa.parse(sampleCSV2.trim(), {
-      header: true,
-      complete: (result) => {
-        setData(result.data);
-      },
-    });
+      csv = sampleCSV;
+    } else if (sampleData === "optimise") {
+      csv = sampleCSV2;
+    }
+
+    if (csv) {
+        Papa.parse(csv, {
+            header: true,
+            skipEmptyLines: true, // This will skip empty lines in the CSV
+            complete: (result) => {
+                // We filter the data to remove any unwanted properties like __parsed_extra
+                const cleanedData = result.data.map(item => {
+                    const {__parsed_extra, ...cleanedItem} = item; // Removing __parsed_extra property
+                    return cleanedItem;
+                });
+
+                setData(cleanedData);
+                setCsvData(csv.trim());
+            },
+        });
+    } else {
+        console.error("Sample data type not recognized!");
+    }
 };
-}
-
-return (
+  return (
     <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
-            <Card>
-                <CardContent>
-                    <ThemeProvider theme={theme}>
-                        <Typography variant="h6" gutterBottom>
-                            Step 1: Choose Your Data
-                        </Typography>
-                        <Grid container spacing={2} direction="column" alignItems="center">
-                            <Grid item xs={12}>
-                                <input
-                                    accept="*/*"
-                                    id="contained-button-file"
-                                    type="file"
-                                    hidden
-                                    onChange={onFileChange}
-                                />
-                                <label htmlFor="contained-button-file">
-                                    <Button variant="contained" color="primary" component="span">
-                                        Upload Your File
-                                    </Button>
-                                </label>
-                            </Grid>
-                            <Grid item xs={12}>
-                                <Typography variant="body2" align="center">
-                                    OR
-                                </Typography>
-                            </Grid>
-                            <Grid item xs={12}>
-                                <Button variant="contained" color="secondary" onClick={useSampleData}>
-                                    Use Sample Data
-                                </Button>
-                            </Grid>
-                        </Grid>
-                        
-                        <Typography variant="h6" gutterBottom style={{marginTop: '20px'}}>
-                            Step 2: Review and Confirm
-                        </Typography>
-                        {data.length > 0 && (
-                            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
-                                <Button
-                                    variant="contained"
-                                    color="inherit"
-                                    onClick={upload}
-                                >
-                                    Upload Data
-                                </Button>
-                            </div>
-                        )}
-                        {error && (
-                            <Alert severity="error" style={{ marginTop: '10px' }}>
-                                {error}
-                            </Alert>
-                        )}
-                    </ThemeProvider>
-                </CardContent>
-            </Card>
-        </Grid>
+      <Grid item xs={12} md={6}>
+        <Card>
+          <CardContent>
+            <ThemeProvider theme={theme}>
+              <Typography variant="h6" gutterBottom>
+                Step 1: Choose Your Data
+              </Typography>
+              <Grid container spacing={2} direction="column" alignItems="center">
+                <Grid item xs={12}>
+                  <input
+                    accept="*/*"
+                    id="contained-button-file"
+                    type="file"
+                    hidden
+                    onChange={onFileChange}
+                  />
+                  <label htmlFor="contained-button-file">
+                    <Button variant="contained" color="primary" component="span">
+                      Upload Your File
+                    </Button>
+                  </label>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography variant="body2" align="center">
+                    OR
+                  </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Button variant="contained" color="secondary" onClick={useSampleData}>
+                    Use Sample Data
+                  </Button>
+                </Grid>
+              </Grid>
+              
+              <Typography variant="h6" gutterBottom style={{marginTop: '20px'}}>
+                Step 2: Review and Confirm
+              </Typography>
+              {data.length > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
+                  <Button
+                    variant="contained"
+                    color="inherit"
+                    onClick={upload}
+                  >
+                    Upload Data
+                  </Button>
+                </div>
+              )}
+              {error && (
+                <Alert severity="error" style={{ marginTop: '10px' }}>
+                  {error}
+                </Alert>
+              )}
+            </ThemeProvider>
+          </CardContent>
+        </Card>
+      </Grid>
 
-        <Grid item xs={12} md={6}>
-            {data.length > 0 && (
-                <Card>
-                    <CardHeader title="Preview Your Data" />
-                    <CardContent>
-                        <div style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '400px' }}>
-                            <TableContainer>
-                                <Table stickyHeader aria-label="data table">
-                                    <TableHead>
-                                        <TableRow>
-                                            {Object.keys(data[0]).map((key, index) => (
-                                                <TableCell key={index}>{key}</TableCell>
-                                            ))}
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {data.map((row, rowIndex) => (
-                                            <TableRow key={rowIndex}>
-                                                {Object.values(row).map((cell, cellIndex) => (
-                                                    <TableCell key={cellIndex}>{cell}</TableCell>
-                                                ))}
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </TableContainer>
-                        </div>
-                    </CardContent>
-                </Card>
-            )}
-        </Grid>
+      <Grid item xs={12} md={6}>
+        {data.length > 0 && (
+          <Card>
+            <CardContent title="Preview Your Data">
+              <div style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '400px' }}>
+                <TableContainer>
+                  <Table stickyHeader aria-label="data table">
+                    <TableHead>
+                      <TableRow>
+                        {Object.keys(data[0]).map((key, index) => (
+                          <TableCell key={index}>{key}</TableCell>
+                        ))}
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {data.map((row, rowIndex) => (
+                        <TableRow key={rowIndex}>
+                          {Object.values(row).map((cell, cellIndex) => (
+                            <TableCell key={cellIndex}>{cell}</TableCell>
+                          ))}
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </Grid>
     </Grid>
-);
-}
+  );
+};
 
 export default DataUpload;
