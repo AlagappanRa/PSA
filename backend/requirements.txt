@@ -23,4 +23,4 @@ pytz==2023.3.post1
 scikit-learn==1.0
 scipy==1.7.0
 six==1.16.0
-Werkzeug==3.0.0
+Werkzeug==2.2.3
