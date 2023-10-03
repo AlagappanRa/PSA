@@ -14,7 +14,7 @@ const UserInterface = () => {
                             <Typography variant="h6" gutterBottom align="center">
                                 Upload Your Historical Data Here
                             </Typography>
-                            <DataUpload />
+                            <DataUpload sampleData={"demand_forecast"}/>
                         </CardContent>
                     </Card>
                 </Grid>

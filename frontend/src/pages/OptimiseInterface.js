@@ -69,20 +69,21 @@ function OptimiseInterface() {
     const allocations = getAllocations();
 
     return (
-        <Container>
-            <Card>
-                <CardContent>
-                    <Typography variant="h4" gutterBottom align="center">
-                        Optimize Ship and Berth Allocation
-                    </Typography>
+        <Box sx={{ height: '100vh', width: '100%' }}>
+            <Container maxWidth={false}>
+                <Card>
+                    <CardContent>
+                        <Typography variant="h4" gutterBottom align="center">
+                            Optimize Ship and Berth Allocation
+                        </Typography>
 
-                    <Box mt={5}>
-                        <Grid item container spacing={3} direction="column">
-                            <Grid item xs={12} sm={6}>
-                                <DataUpload onUpload={onUpload} />
+                        <Box mt={5}>
+                            <Grid item container spacing={3} direction="column">
+                                <Grid item xs={12} sm={6}>
+                                    <DataUpload onUpload={onUpload} sampleData={"optimise"}/>
+                                </Grid>
                             </Grid>
-                        </Grid>
-                    </Box>
+                        </Box>
 
                     {results && (
                         <Box mt={3}>
@@ -159,6 +160,7 @@ function OptimiseInterface() {
                 </CardContent>
             </Card>
         </Container>
+    </Box>
     );
 }
 

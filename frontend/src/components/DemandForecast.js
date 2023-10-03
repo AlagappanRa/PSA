@@ -30,6 +30,18 @@ const DemandForecast = () => {
         "demand": ""
     });
 
+    const sampleData = {
+        "berth_capacity": 325,
+        "ship_size": 75.23,
+        "cargo_volume": 4500.87,
+        "equipment_availability": 30.75,
+        "worker_availability": 18,
+        "operational_costs": 3600.52,
+        "tide_levels": 2.9,
+        "ship_arrival_delays": 25,
+        "demand": 160
+    };
+
     const handleInputChange = (e) => {
         let { name, value, type } = e.target;
 
@@ -38,6 +50,10 @@ const DemandForecast = () => {
         }
 
         setFormData((prevState) => ({ ...prevState, [name]: value }));
+    };
+
+    const useSampleData = () => {
+        setFormData(sampleData);
     };
 
     const getForecast = async () => {
@@ -140,6 +156,14 @@ const DemandForecast = () => {
                         onChange={handleInputChange}
                         fullWidth
                     />
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={useSampleData}
+                        fullWidth
+                    >
+                        Use Sample Data
+                    </Button>
                     <Button
                         variant="contained"
                         color="secondary"

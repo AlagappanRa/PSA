@@ -1,6 +1,0 @@
-berth_capacity,ship_size,cargo_volume,equipment_availability,worker_availability,operational_costs,weather_conditions,tide_levels,ship_arrival_delays,demand
-100,50,1000,10,5,1000,"sunny",2.5,10,100
-150,55,1500,15,7,1500,"rainy",3.0,15,110
-200,60,2000,20,10,2000,"cloudy",2.8,20,120
-250,65,2500,25,12,2500,"sunny",3.1,25,130
-300,70,3000,30,15,3000,"rainy",2.9,30,140

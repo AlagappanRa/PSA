@@ -1,108 +1,217 @@
-import React, { useState } from "react";
-import axios from "axios";
-import Button from "@mui/material/Button";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { amber, indigo } from "@mui/material/colors";
-import Card from "@mui/material/Card";
-import CardHeader from "@mui/material/CardHeader";
-import CardContent from "@mui/material/CardContent";
-import Typography from "@mui/material/Typography";
-import Grid from "@mui/material/Grid";
-import Alert from "@mui/material/Alert";
+import React, { useState } from 'react';
+import axios from 'axios';
+import Button from '@mui/material/Button';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { amber, indigo } from '@mui/material/colors';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import CardHeader from '@mui/material/CardHeader';
+import Typography from '@mui/material/Typography';
+import Grid from '@mui/material/Grid';
+import Alert from '@mui/material/Alert';
+import Papa from 'papaparse';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+
+const sampleCSV = `
+berth_capacity,ship_size,cargo_volume,equipment_availability,worker_availability,operational_costs,tide_levels,ship_arrival_delays,demand
+100.0,47.5281046698,1043.8817099246,8.0312804484,23,992.686801195,0.0,10,129.3959478218
+150.0,59.4406050682,1136.2600349405,11.7294645301,17,1118.028438936,1.0,14,126.5372475394
+200.0,56.0874881831,2072.3750094038,17.3991558443,20,2063.687019589,1.7320508076,43,133.6760209771
+250.0,71.3089609182,2905.9045802751,27.5758697667,5,3049.770236191,2.0,46,182.8614360494
+300.0,65.0478491094,3121.7311842363,29.7672733876,17,3155.783132249,1.7320508076,19,150.9501443663
+350.0,81.8424339323,3810.8071061491,35.7445641912,11,3658.395653717,1.0,16,148.4297684313
+400.0,80.1999687571,4463.0876908475,39.3891639828,8,4349.281224119,0.0,50,170.3800664689
+450.0,89.3258188191,5158.3625840997,43.2513959987,22,5232.810341788,-1.0,43,226.0009174019
+500.0,89.7612625217,5848.9461607378,54.063894587,7,5628.574222159,-1.7320508076,10,227.1352769632
+550.0,102.0793651049,6038.2966430255,58.4503484128,21,6111.808898693,-2.0,29,203.6742348994
+`;
+
+const sampleCSV2 = `
+ships,berth_capacity,berth_availability
+10000,5000,1
+15000,6000,1
+20000,7000,1
+25000,8000,1
+12000,5500,0
+13000,6500,1
+18000,7500,1
+19000,8500,0
+11000,5200,1
+16000,7200,1
+27000,9000,1
+14000,5600,0
+22000,7600,1
+24000,7800,1
+17000,7100,0
+28000,9100,1
+26000,8900,1
+21000,7400,0
+23000,7700,1
+29000,9200,1
+`;
+
 
 const theme = createTheme({
-    palette: {
-        primary: amber,
-        secondary: indigo,
-    },
+  palette: {
+    primary: amber,
+    secondary: indigo,
+  },
 });
 
-const DataUpload = ({ onUpload }) => {
-    const [file, setFile] = useState(null);
-    const [error, setError] = useState("");
+const DataUpload = ({ onUpload, sampleData }) => {
+  const [file, setFile] = useState(null);
+  const [error, setError] = useState('');
+  const [data, setData] = useState([]);
 
-    const onFileChange = (event) => {
-        setFile(event.target.files[0]);
-    };
+  const onFileChange = (event) => {
+    setFile(event.target.files[0]);
+    if (event.target.files[0]) {
+      Papa.parse(event.target.files[0], {
+        complete: (result) => {
+          console.log('Parsed Result', result);
+          setData(result.data);
+        },
+        header: true,
+      });
+    }
+  };
 
-    const upload = async () => {
-        if (!onUpload) {
-            // Check if onUpload prop is provided
-            const formData = new FormData();
-            formData.append("file", file);
+  const upload = async () => {
+    if (!onUpload) {
+      const formData = new FormData();
+      formData.append('file', file);
 
-            try {
-                await axios.post(
-                    `${process.env.REACT_APP_SERVER_URL}/upload`,
-                    formData
-                );
-                // Handle successful upload, e.g., set a success message or do something else
-            } catch (error) {
-                console.error("There was an error uploading the file!", error);
-                setError("There was an error uploading the file!");
-            }
-        } else if (file) {
-            onUpload(file); // If onUpload prop is provided and file is selected, call onUpload function
-        }
-    };
+      try {
+        await axios.post(
+          `${process.env.REACT_APP_SERVER_URL}/upload`,
+          formData
+        );
+        setError(''); // Clear any previous error messages
+      } catch (error) {
+        console.error('There was an error uploading the file!', error);
+        setError('There was an error uploading the file!');
+      }
+    } else if (file) {
+      onUpload(file);
+    }
+  };
 
-    const current = new Date();
-    const date = `${current.getDate()}/${
-        current.getMonth() + 1
-    }/${current.getFullYear()} ${current.getHours()}:${current.getMinutes()}:${current.getSeconds()}`;
+  const useSampleData = () => {
+    if (sampleData === "demand_forecast") {
+    Papa.parse(sampleCSV.trim(), {
+      header: true,
+      complete: (result) => {
+        setData(result.data);
+      },
+    });
+} else if (sampleData === "optimise") {
+    Papa.parse(sampleCSV2.trim(), {
+      header: true,
+      complete: (result) => {
+        setData(result.data);
+      },
+    });
+};
+}
 
-    return (
-        <Card>
-            <CardContent>
-                <ThemeProvider theme={theme}>
-                    <Grid container spacing={2} direction="column" alignItems="center">
-                        <Grid item xs={12}>
-                            <input
-                                accept="*/*"
-                                id="contained-button-file"
-                                type="file"
-                                hidden
-                                onChange={onFileChange}
-                            />
-                            <label htmlFor="contained-button-file">
+return (
+    <Grid container spacing={3}>
+        <Grid item xs={12} md={6}>
+            <Card>
+                <CardContent>
+                    <ThemeProvider theme={theme}>
+                        <Typography variant="h6" gutterBottom>
+                            Step 1: Choose Your Data
+                        </Typography>
+                        <Grid container spacing={2} direction="column" alignItems="center">
+                            <Grid item xs={12}>
+                                <input
+                                    accept="*/*"
+                                    id="contained-button-file"
+                                    type="file"
+                                    hidden
+                                    onChange={onFileChange}
+                                />
+                                <label htmlFor="contained-button-file">
+                                    <Button variant="contained" color="primary" component="span">
+                                        Upload Your File
+                                    </Button>
+                                </label>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <Typography variant="body2" align="center">
+                                    OR
+                                </Typography>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <Button variant="contained" color="secondary" onClick={useSampleData}>
+                                    Use Sample Data
+                                </Button>
+                            </Grid>
+                        </Grid>
+                        
+                        <Typography variant="h6" gutterBottom style={{marginTop: '20px'}}>
+                            Step 2: Review and Confirm
+                        </Typography>
+                        {data.length > 0 && (
+                            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
                                 <Button
                                     variant="contained"
-                                    color="primary"
-                                    component="span"
+                                    color="inherit"
+                                    onClick={upload}
                                 >
-                                    Select File
+                                    Upload Data
                                 </Button>
-                            </label>
-                        </Grid>
-                        <Grid item xs={12}>
-                            <Button
-                                variant="contained"
-                                color="secondary"
-                                onClick={upload}
-                                disabled={!file}
-                            >
-                                Upload Data
-                            </Button>
-                        </Grid>
-                        <Grid item xs={12}>
-                            <Typography
-                                variant="body2"
-                                color="text.secondary"
-                                align="center"
-                            >
-                                Upload your data file here!
-                            </Typography>
-                        </Grid>
-                    </Grid>
-                    {error && (
-                        <Grid item xs={12}>
-                            <Alert severity="error">{error}</Alert>
-                        </Grid>
-                    )}
-                </ThemeProvider>
-            </CardContent>
-        </Card>
-    );
-};
+                            </div>
+                        )}
+                        {error && (
+                            <Alert severity="error" style={{ marginTop: '10px' }}>
+                                {error}
+                            </Alert>
+                        )}
+                    </ThemeProvider>
+                </CardContent>
+            </Card>
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+            {data.length > 0 && (
+                <Card>
+                    <CardHeader title="Preview Your Data" />
+                    <CardContent>
+                        <div style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '400px' }}>
+                            <TableContainer>
+                                <Table stickyHeader aria-label="data table">
+                                    <TableHead>
+                                        <TableRow>
+                                            {Object.keys(data[0]).map((key, index) => (
+                                                <TableCell key={index}>{key}</TableCell>
+                                            ))}
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {data.map((row, rowIndex) => (
+                                            <TableRow key={rowIndex}>
+                                                {Object.values(row).map((cell, cellIndex) => (
+                                                    <TableCell key={cellIndex}>{cell}</TableCell>
+                                                ))}
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+        </Grid>
+    </Grid>
+);
+}
 
 export default DataUpload;
