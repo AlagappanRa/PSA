@@ -88,18 +88,22 @@ const DataUpload = ({ onUpload, sampleData }) => {
     if (csvData) {
       console.log(csvData)
       const blob = new Blob([csvData], { type: 'text/csv' });
-      onUpload(blob)
+      if (onUpload) {
+        onUpload(blob)
+      }
       formData.append('file', blob, 'data.csv');
       console.log("Form data is : " + formData)
     } else if (file) {
-      onUpload(file)
+      if (onUpload) {
+        onUpload(file)
+      }
       console.log("File is : " + file)
       formData.append('file', file);
     }
 
     console.log("Total print: " + formData)
 
-    if (sampleData === "demand_forecast") {
+    if (!onUpload) {
     try {
       console.log(formData.forEach(x => console.log(x)));
       await axios.post(
