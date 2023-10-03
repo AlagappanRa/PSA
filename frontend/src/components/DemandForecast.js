@@ -19,15 +19,15 @@ const StyledPaper = styled(Paper)(() => ({
 const DemandForecast = () => {
     const [forecast, setForecast] = useState(null);
     const [formData, setFormData] = useState({
-        "berth_capacity": 325,
-        "ship_size": 75.23,
-        "cargo_volume": 4500.87,
-        "equipment_availability": 30.75,
-        "worker_availability": 18,
-        "operational_costs": 3600.52,
-        "tide_levels": 2.9,
-        "ship_arrival_delays": 25,
-        "demand": 160
+        "berth_capacity": "",
+        "ship_size": "",
+        "cargo_volume": "",
+        "equipment_availability": "",
+        "worker_availability": "",
+        "operational_costs": "",
+        "tide_levels": "",
+        "ship_arrival_delays": "",
+        "demand": ""
     });
 
     const handleInputChange = (e) => {
