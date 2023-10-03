@@ -34,6 +34,9 @@ except Exception as e:
 data = None
 feature_importances = None
 
+@app.route("/", methods=["HEAD"])
+def default():
+    return jsonify({"200": "Server pinged successfully!"})
 
 @app.route("/health", methods=["GET"])
 def health():
