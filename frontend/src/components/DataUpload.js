@@ -86,32 +86,34 @@ const DataUpload = ({ onUpload, sampleData }) => {
     const formData = new FormData();
 
     if (csvData) {
+      console.log(csvData)
       const blob = new Blob([csvData], { type: 'text/csv' });
+      onUpload(blob)
       formData.append('file', blob, 'data.csv');
       console.log("Form data is : " + formData)
     } else if (file) {
+      onUpload(file)
       console.log("File is : " + file)
       formData.append('file', file);
     }
 
     console.log("Total print: " + formData)
 
+    if (sampleData === "demand_forecast") {
     try {
+      console.log(formData.forEach(x => console.log(x)));
       await axios.post(
         `${process.env.REACT_APP_SERVER_URL}/upload`,
         formData
       );
       setError('');
 
-      // Invoke the onUpload prop here
-      if (onUpload) {
-        onUpload(file || csvData);
-      }
     } catch (error) {
       console.error('There was an error uploading the file!', error);
       setError('There was an error uploading the file!');
     }
-  };
+    } 
+};
 
 const useSampleData = () => {
     let csv;

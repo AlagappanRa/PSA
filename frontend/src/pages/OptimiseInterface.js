@@ -30,8 +30,12 @@ function OptimiseInterface() {
         try {
             const response = await axios.post(
                 `${process.env.REACT_APP_SERVER_URL}/optimize`,
-                formData
+                formData, 
+                { 
+                    headers: {'Content-Type': 'multipart/form-data'}
+                }
             );
+            console.log(response.data)
             setResults(response.data);
         } catch (error) {
             console.error("There was an error!", error);
