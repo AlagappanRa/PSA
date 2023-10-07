@@ -141,6 +141,10 @@ def train_model():
     with open("model.pkl", "wb") as f:
         joblib.dump(best_model, f)
 
+    # Delete all files in GridFS
+    for grid_out in fs.find():
+        fs.delete(grid_out._id)
+
     # Read the model from the file and save it to MongoDB
     with open("model.pkl", "rb") as f:
         fs.put(f, filename="model.pkl")
