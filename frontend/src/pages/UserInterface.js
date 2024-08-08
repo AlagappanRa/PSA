@@ -11,9 +11,9 @@ const UserInterface = () => {
                 <Grid item xs={12}>
                     <Card elevation={3}>
                         <CardContent>
-                            <Typography variant="h6" gutterBottom align="center">
+                            {/* <Typography variant="h6" gutterBottom align="center">
                                 Upload Your Historical Data Here
-                            </Typography>
+                            </Typography> */}
                             <DataUpload sampleData={"demand_forecast"}/>
                         </CardContent>
                     </Card>
@@ -23,7 +23,7 @@ const UserInterface = () => {
                     <Card elevation={3}>
                         <CardContent>
                             <Typography variant="h6" gutterBottom align="center">
-                                Train Your Model
+                                Step 3: Train Model
                             </Typography>
                             <TrainModel />
                         </CardContent>

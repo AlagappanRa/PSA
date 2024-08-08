@@ -1,21 +1,25 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import Button from '@mui/material/Button';
+import Papa from 'papaparse';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { amber, indigo } from '@mui/material/colors';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import CardHeader from '@mui/material/CardHeader';
-import Typography from '@mui/material/Typography';
-import Grid from '@mui/material/Grid';
-import Alert from '@mui/material/Alert';
-import Papa from 'papaparse';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CircularProgress,
+  Typography,
+  Grid,
+  Alert,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow
+} from '@mui/material';
+
 
 const sampleCSV = `
 berth_capacity,ship_size,cargo_volume,equipment_availability,worker_availability,operational_costs,tide_levels,ship_arrival_delays,demand
@@ -68,6 +72,7 @@ const DataUpload = ({ onUpload, sampleData }) => {
   const [error, setError] = useState('');
   const [data, setData] = useState([]);
   const [csvData, setCsvData] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const onFileChange = (event) => {
     setFile(event.target.files[0]);
@@ -104,17 +109,20 @@ const DataUpload = ({ onUpload, sampleData }) => {
     console.log("Total print: " + formData)
 
     if (!onUpload) {
-    try {
-      console.log(formData.forEach(x => console.log(x)));
-      await axios.post(
-        `${process.env.REACT_APP_SERVER_URL}/upload`,
-        formData
-      );
-      setError('');
+      setLoading(true);
+      try {
+        console.log(formData.forEach(x => console.log(x)));
+        await axios.post(
+          `${process.env.REACT_APP_SERVER_URL}/upload`,
+          formData
+        );
+        setError('');
 
-    } catch (error) {
-      console.error('There was an error uploading the file!', error);
-      setError('There was an error uploading the file!');
+      } catch (error) {
+        console.error('There was an error uploading the file!', error);
+        setError('There was an error uploading the file!');
+      } finally {
+        setLoading(false); // Set loading to false when the request finishes
     }
     } 
 };
@@ -153,7 +161,7 @@ const useSampleData = () => {
           <CardContent>
             <ThemeProvider theme={theme}>
               <Typography variant="h6" gutterBottom>
-                Step 1: Choose Your Data
+                Step 1: Upload Historical Data
               </Typography>
               <Grid container spacing={2} direction="column" alignItems="center">
                 <Grid item xs={12}>
@@ -191,6 +199,7 @@ const useSampleData = () => {
                     variant="contained"
                     color="inherit"
                     onClick={upload}
+                    disabled={loading} // Disable button when loading
                   >
                     Upload Data
                   </Button>

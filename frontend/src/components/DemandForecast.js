@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {
+    CircularProgress,
     TextField,
     Button,
     Typography,
@@ -17,6 +18,7 @@ const StyledPaper = styled(Paper)(() => ({
 }));
 
 const DemandForecast = () => {
+    const [loading, setLoading] = useState(false);
     const [forecast, setForecast] = useState(null);
     const [formData, setFormData] = useState({
         "berth_capacity": "",
@@ -57,6 +59,7 @@ const DemandForecast = () => {
     };
 
     const getForecast = async () => {
+        setLoading(true);
         try {
             const response = await axios.post(
                 `${process.env.REACT_APP_SERVER_URL}/forecast`,
@@ -65,6 +68,8 @@ const DemandForecast = () => {
             setForecast(response.data);
         } catch (error) {
             console.error("There was an error fetching the forecast!", error);
+        } finally {
+            setLoading(false); // Set loading to false when the request finishes
         }
     };
 
@@ -72,8 +77,8 @@ const DemandForecast = () => {
         <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
                 <StyledPaper>
-                    <Typography variant="h6">
-                        Input today's information
+                    <Typography variant="h6" gutterBottom>
+                        Step 4: Input today's information
                     </Typography>
                     <TextField
                         style={{ marginBottom: '20px' }}
@@ -169,8 +174,9 @@ const DemandForecast = () => {
                         color="secondary"
                         onClick={getForecast}
                         fullWidth
+                        disabled={loading} // Disable button when loading
                     >
-                        Get Demand Forecast
+                        {loading ? <CircularProgress size={24} /> : 'Get Demand Forecast'} 
                     </Button>
                 </StyledPaper>
             </Grid>
